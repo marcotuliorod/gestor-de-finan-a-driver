@@ -4,6 +4,7 @@ class DashboardSummary {
     required this.otherExpenseCents,
     required this.fuelExpenseCents,
     required this.tripCount,
+    this.depreciationCents = 0,
     this.monthlyGoalCents,
     this.goalProgress,
   });
@@ -12,10 +13,12 @@ class DashboardSummary {
   final int otherExpenseCents;
   final int fuelExpenseCents;
   final int tripCount;
+  final int depreciationCents;
   final int? monthlyGoalCents;
   final double? goalProgress;
 
-  int get totalExpensesCents => otherExpenseCents + fuelExpenseCents;
+  int get totalExpensesCents =>
+      otherExpenseCents + fuelExpenseCents + depreciationCents;
   int get netProfitCents => totalIncomeCents - totalExpensesCents;
   bool get isGoalMet => goalProgress != null && goalProgress! >= 1.0;
 }

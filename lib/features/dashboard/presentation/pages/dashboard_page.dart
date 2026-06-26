@@ -325,6 +325,25 @@ class _ExpenseBreakdown extends StatelessWidget {
               ),
             ),
           ),
+          if (summary.depreciationCents > 0)
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFF3E5F5),
+                child: Icon(
+                  Icons.trending_down_rounded,
+                  color: Color(0xFF7B1FA2),
+                  size: 20,
+                ),
+              ),
+              title: const Text('Depreciação'),
+              trailing: Text(
+                formatCurrency(summary.depreciationCents),
+                style: const TextStyle(
+                  color: AppColors.expense,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

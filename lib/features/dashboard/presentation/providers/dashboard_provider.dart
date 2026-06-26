@@ -3,6 +3,7 @@ import 'package:driver_finance/features/expenses/presentation/providers/expense_
 import 'package:driver_finance/features/fuel/presentation/providers/fuel_provider.dart';
 import 'package:driver_finance/features/goals/presentation/providers/goal_provider.dart';
 import 'package:driver_finance/features/trips/presentation/providers/trip_provider.dart';
+import 'package:driver_finance/features/vehicle/presentation/providers/vehicle_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final dashboardSummaryProvider =
@@ -11,6 +12,7 @@ final dashboardSummaryProvider =
   final expensesAsync = ref.watch(watchExpensesProvider(period));
   final fuelsAsync = ref.watch(watchFuelRecordsProvider);
   final goalAsync = ref.watch(watchCurrentGoalProvider);
+  final vehicleAsync = ref.watch(watchVehicleProvider);
 
   if (tripsAsync.isLoading || expensesAsync.isLoading) return null;
 
@@ -24,6 +26,7 @@ final dashboardSummaryProvider =
       )
       .toList();
   final goal = goalAsync.valueOrNull;
+  final vehicle = vehicleAsync.valueOrNull;
 
   final income = trips.fold<int>(0, (s, t) => s + t.totalIncomeCents);
   final otherExp = expenses.fold<int>(0, (s, e) => s + e.amountCents);
@@ -33,6 +36,13 @@ final dashboardSummaryProvider =
       ? income / goalCents
       : null;
 
+  final daysInMonth = DateTime(period.$1.year, period.$1.month + 1, 0).day;
+  final periodDays =
+      period.$2.difference(period.$1).inDays.clamp(1, daysInMonth);
+  final depreciationCents = vehicle != null
+      ? (vehicle.monthlyDepreciationCents * periodDays / daysInMonth).round()
+      : 0;
+
   return DashboardSummary(
     totalIncomeCents: income,
     otherExpenseCents: otherExp,
@@ -40,5 +50,6 @@ final dashboardSummaryProvider =
     tripCount: trips.length,
     monthlyGoalCents: goalCents,
     goalProgress: goalProgress,
+    depreciationCents: depreciationCents,
   );
 });

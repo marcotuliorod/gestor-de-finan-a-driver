@@ -12,11 +12,25 @@ import 'package:driver_finance/features/mileage/presentation/providers/mileage_p
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-(DateTime, DateTime) _thisMonthRange() {
-  final now = DateTime.now();
-  final start = DateTime(now.year, now.month);
-  final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
-  return (start, end);
+enum _ExpensePeriod { thisMonth, threeMonths, thisYear }
+
+extension on _ExpensePeriod {
+  String get label => switch (this) {
+        _ExpensePeriod.thisMonth => 'Este mês',
+        _ExpensePeriod.threeMonths => 'Últimos 3 meses',
+        _ExpensePeriod.thisYear => 'Este ano',
+      };
+
+  (DateTime, DateTime) get range {
+    final now = DateTime.now();
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    final start = switch (this) {
+      _ExpensePeriod.thisMonth => DateTime(now.year, now.month),
+      _ExpensePeriod.threeMonths => DateTime(now.year, now.month - 2),
+      _ExpensePeriod.thisYear => DateTime(now.year),
+    };
+    return (start, end);
+  }
 }
 
 class ExpenseListPage extends ConsumerStatefulWidget {
@@ -150,38 +164,84 @@ class _FuelTile extends StatelessWidget {
   }
 }
 
-class _ExpensesTab extends ConsumerWidget {
+class _ExpensesTab extends ConsumerStatefulWidget {
   const _ExpensesTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final range = _thisMonthRange();
-    final expensesAsync =
-        ref.watch(watchExpensesProvider(range));
-    return expensesAsync.when(
-      loading: () =>
-          const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Erro: $e')),
-      data: (expenses) {
-        if (expenses.isEmpty) {
-          return const _EmptyState(
-            icon: Icons.receipt_long_outlined,
-            message: 'Nenhuma despesa este mês',
-          );
-        }
-        final total = expenses.fold<int>(0, (s, e) => s + e.amountCents);
-        return Column(
-          children: [
-            _TotalBanner(totalCents: total),
-            Expanded(
-              child: ListView.builder(
-                itemCount: expenses.length,
-                itemBuilder: (_, i) => _ExpenseTile(expense: expenses[i]),
+  ConsumerState<_ExpensesTab> createState() => _ExpensesTabState();
+}
+
+class _ExpensesTabState extends ConsumerState<_ExpensesTab> {
+  _ExpensePeriod _period = _ExpensePeriod.thisMonth;
+
+  @override
+  Widget build(BuildContext context) {
+    final range = _period.range;
+    final expensesAsync = ref.watch(watchExpensesProvider(range));
+
+    return Column(
+      children: [
+        _PeriodChips(
+          selected: _period,
+          onChanged: (p) => setState(() => _period = p),
+        ),
+        Expanded(
+          child: expensesAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Erro: $e')),
+            data: (expenses) {
+              if (expenses.isEmpty) {
+                return _EmptyState(
+                  icon: Icons.receipt_long_outlined,
+                  message: 'Nenhuma despesa em ${_period.label.toLowerCase()}',
+                );
+              }
+              final total =
+                  expenses.fold<int>(0, (s, e) => s + e.amountCents);
+              return Column(
+                children: [
+                  _TotalBanner(totalCents: total),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: expenses.length,
+                      itemBuilder: (_, i) =>
+                          _ExpenseTile(expense: expenses[i]),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PeriodChips extends StatelessWidget {
+  const _PeriodChips({required this.selected, required this.onChanged});
+
+  final _ExpensePeriod selected;
+  final ValueChanged<_ExpensePeriod> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Row(
+        children: _ExpensePeriod.values
+            .map(
+              (p) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(p.label),
+                  selected: p == selected,
+                  onSelected: (_) => onChanged(p),
+                ),
               ),
-            ),
-          ],
-        );
-      },
+            )
+            .toList(),
+      ),
     );
   }
 }
@@ -223,7 +283,7 @@ class _MileageTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final range = _thisMonthRange();
+    final range = _ExpensePeriod.thisMonth.range;
     final mileageAsync = ref.watch(watchMileageProvider(range));
     return mileageAsync.when(
       loading: () =>

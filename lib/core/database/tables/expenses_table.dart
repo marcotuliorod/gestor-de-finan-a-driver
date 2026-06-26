@@ -9,14 +9,12 @@ class Expenses extends Table {
   IntColumn get amountCents => integer()();
   TextColumn get description => text().nullable()();
   DateTimeColumn get expenseDate => dateTime()();
-  BoolColumn get isRecurring =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isRecurring => boolean().withDefault(const Constant(false))();
   TextColumn get recurrenceType => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
-  TextColumn get syncStatus =>
-      text().withDefault(const Constant('pending'))();
+  TextColumn get syncStatus => text().withDefault(const Constant('pending'))();
   DateTimeColumn get syncedAt => dateTime().nullable()();
 
   @override

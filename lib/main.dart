@@ -7,8 +7,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const supabaseUrl =
-      String.fromEnvironment('SUPABASE_URL', defaultValue: '');
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: '');
   const supabaseAnonKey =
       String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: '');
   const sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');

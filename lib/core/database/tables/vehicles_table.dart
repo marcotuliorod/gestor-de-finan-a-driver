@@ -11,14 +11,12 @@ class Vehicles extends Table {
   RealColumn get tankCapacityL => real()();
   IntColumn get purchasePriceCents => integer()();
   IntColumn get usefulLifeMonths => integer().withDefault(const Constant(60))();
-  RealColumn get residualValuePct =>
-      real().withDefault(const Constant(0.20))();
+  RealColumn get residualValuePct => real().withDefault(const Constant(0.20))();
   IntColumn get currentOdometer => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
-  TextColumn get syncStatus =>
-      text().withDefault(const Constant('pending'))();
+  TextColumn get syncStatus => text().withDefault(const Constant('pending'))();
   DateTimeColumn get syncedAt => dateTime().nullable()();
 
   @override

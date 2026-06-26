@@ -1,10 +1,17 @@
+import 'dart:io';
+
 import 'package:driver_finance/core/ui/theme/app_colors.dart';
+import 'package:driver_finance/core/utils/csv_exporter.dart';
 import 'package:driver_finance/core/utils/currency_formatter.dart';
+import 'package:driver_finance/features/expenses/presentation/providers/expense_provider.dart';
 import 'package:driver_finance/features/reports/domain/entities/reports_summary.dart';
 import 'package:driver_finance/features/reports/presentation/providers/reports_provider.dart';
+import 'package:driver_finance/features/trips/presentation/providers/trip_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 enum _Period { today, thisWeek, thisMonth }
 
@@ -42,6 +49,28 @@ class ReportsPage extends ConsumerStatefulWidget {
 
 class _ReportsPageState extends ConsumerState<ReportsPage> {
   _Period _period = _Period.thisMonth;
+  bool _exporting = false;
+
+  Future<void> _exportCsv((DateTime, DateTime) range) async {
+    setState(() => _exporting = true);
+    try {
+      final trips = ref.read(watchTripsProvider(range)).valueOrNull ?? [];
+      final expenses = ref.read(watchExpensesProvider(range)).valueOrNull ?? [];
+
+      final dir = await getTemporaryDirectory();
+      final tripsFile = File('${dir.path}/corridas.csv');
+      final expensesFile = File('${dir.path}/despesas.csv');
+      await tripsFile.writeAsString(tripsToCSV(trips));
+      await expensesFile.writeAsString(expensesToCSV(expenses));
+
+      await Share.shareXFiles(
+        [XFile(tripsFile.path), XFile(expensesFile.path)],
+        subject: 'Relatório Driver Finance',
+      );
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +78,26 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     final summary = ref.watch(reportsSummaryProvider(range));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Relatórios')),
+      appBar: AppBar(
+        title: const Text('Relatórios'),
+        actions: [
+          if (_exporting)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.download_outlined),
+              tooltip: 'Exportar CSV',
+              onPressed: () => _exportCsv(range),
+            ),
+        ],
+      ),
       body: summary == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(

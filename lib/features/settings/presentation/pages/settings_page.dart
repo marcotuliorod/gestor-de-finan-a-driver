@@ -73,6 +73,14 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
           ),
+          ListTile(
+            leading: const Icon(Icons.auto_awesome_rounded,
+                color: AppColors.primary),
+            title: const Text('Assistente IA'),
+            subtitle: const Text('Converse sobre suas finanças'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.go('/app/ai'),
+          ),
           goalAsync.when(
             loading: () => const ListTile(
               leading: Icon(Icons.flag_outlined),

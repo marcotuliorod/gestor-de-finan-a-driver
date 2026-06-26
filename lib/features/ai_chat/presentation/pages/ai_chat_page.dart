@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AiChatPage extends ConsumerStatefulWidget {
-  const AiChatPage({super.key});
+  const AiChatPage({super.key, this.conversationId});
+
+  final String? conversationId;
 
   @override
   ConsumerState<AiChatPage> createState() => _AiChatPageState();
@@ -36,39 +38,34 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
 
   void _send() {
     final text = _textCtrl.text.trim();
-    if (text.isEmpty || ref.read(aiChatProvider).isTyping) return;
-    ref.read(aiChatProvider.notifier).sendMessage(text);
+    if (text.isEmpty ||
+        ref.read(aiChatProvider(widget.conversationId)).isTyping) return;
+    ref
+        .read(aiChatProvider(widget.conversationId).notifier)
+        .sendMessage(text);
     _textCtrl.clear();
     _scrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
-    final chatState = ref.watch(aiChatProvider);
+    final chatState = ref.watch(aiChatProvider(widget.conversationId));
 
-    ref.listen<AiChatState>(aiChatProvider, (_, next) {
+    ref.listen<AiChatState>(aiChatProvider(widget.conversationId), (_, next) {
       if (next.messages.isNotEmpty) _scrollToBottom();
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Assistente IA'),
-        actions: [
-          if (chatState.messages.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.refresh_rounded),
-              tooltip: 'Nova conversa',
-              onPressed: () => ref.invalidate(aiChatProvider),
-            ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Assistente IA')),
       body: Column(
         children: [
           Expanded(
             child: chatState.messages.isEmpty
                 ? _EmptyState(
                     onSuggestion: (text) {
-                      ref.read(aiChatProvider.notifier).sendMessage(text);
+                      ref
+                          .read(aiChatProvider(widget.conversationId).notifier)
+                          .sendMessage(text);
                       _scrollToBottom();
                     },
                   )
@@ -331,8 +328,7 @@ class _InputBar extends StatelessWidget {
             style: IconButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              disabledBackgroundColor:
-                  AppColors.primary.withOpacity(0.4),
+              disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
             ),
           ),
         ],

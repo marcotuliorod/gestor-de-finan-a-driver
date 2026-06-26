@@ -29,7 +29,9 @@ class SettingsPage extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.person_outline),
               title: const Text('Conta'),
-              subtitle: Text(user.email),
+              subtitle: Text(user.displayName ?? user.email),
+              trailing: const Icon(Icons.edit_outlined),
+              onTap: () => _editDisplayName(context, ref, user.displayName),
             ),
             const Divider(),
           ],
@@ -144,6 +146,46 @@ class SettingsPage extends ConsumerWidget {
             onTap: () => _confirmDeleteAccount(context, ref),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _editDisplayName(
+      BuildContext context, WidgetRef ref, String? current) async {
+    final controller = TextEditingController(text: current ?? '');
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Editar nome'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Nome'),
+          textCapitalization: TextCapitalization.words,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (name == null || name.isEmpty || !context.mounted) return;
+    final result =
+        await ref.read(authNotifierProvider.notifier).updateDisplayName(name);
+    if (!context.mounted) return;
+    result.fold(
+      (failure) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(failure.message)),
+      ),
+      (_) => ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nome atualizado')),
       ),
     );
   }

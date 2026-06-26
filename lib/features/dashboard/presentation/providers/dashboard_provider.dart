@@ -1,3 +1,4 @@
+import 'package:driver_finance/features/dashboard/domain/entities/daily_revenue.dart';
 import 'package:driver_finance/features/dashboard/domain/entities/dashboard_summary.dart';
 import 'package:driver_finance/features/expenses/presentation/providers/expense_provider.dart';
 import 'package:driver_finance/features/fuel/presentation/providers/fuel_provider.dart';
@@ -43,6 +44,17 @@ final dashboardSummaryProvider =
       ? (vehicle.monthlyDepreciationCents * periodDays / daysInMonth).round()
       : 0;
 
+  final dayMap = <DateTime, int>{};
+  for (final trip in trips) {
+    final day = DateTime(
+        trip.tripDate.year, trip.tripDate.month, trip.tripDate.day);
+    dayMap[day] = (dayMap[day] ?? 0) + trip.totalIncomeCents;
+  }
+  final dailyRevenues = dayMap.entries
+      .map((e) => DailyRevenue(date: e.key, amountCents: e.value))
+      .toList()
+    ..sort((a, b) => a.date.compareTo(b.date));
+
   return DashboardSummary(
     totalIncomeCents: income,
     otherExpenseCents: otherExp,
@@ -51,5 +63,6 @@ final dashboardSummaryProvider =
     monthlyGoalCents: goalCents,
     goalProgress: goalProgress,
     depreciationCents: depreciationCents,
+    dailyRevenues: dailyRevenues,
   );
 });

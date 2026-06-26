@@ -73,7 +73,7 @@ class _TripListPageState extends ConsumerState<TripListPage> {
           if (trips.isEmpty) {
             return const _EmptyState();
           }
-          final total = trips.fold(0, (s, t) => s + t.totalIncomeCents);
+          final total = trips.fold<int>(0, (s, t) => s + t.totalIncomeCents);
           return Column(
             children: [
               _TotalBanner(totalCents: total, count: trips.length),
@@ -181,7 +181,7 @@ class _TotalBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.income.withValues(alpha: 0.1),
+      color: AppColors.income.withOpacity(0.1),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,7 +228,7 @@ class _TripTile extends StatelessWidget {
       onDismissed: (_) {},
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.income.withValues(alpha: 0.15),
+          backgroundColor: AppColors.income.withOpacity(0.15),
           child: const Icon(
             Icons.directions_car_rounded,
             color: AppColors.income,

@@ -180,7 +180,7 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
     final user = ref.read(authRepositoryProvider).currentUser;
     if (user == null) return;
 
-    int _parse(String text) =>
+    int parseCents(String text) =>
         ((parseCurrencyInput(text) ?? 0) * 100).round();
 
     final result = await ref
@@ -189,11 +189,11 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
           existingId: widget.existingTrip?.id,
           userId: user.id,
           platformId: _selectedPlatformId!,
-          grossAmountCents: _parse(_grossCtrl.text),
-          bonusAmountCents: _parse(_bonusCtrl.text),
-          tipAmountCents: _parse(_tipCtrl.text),
-          promotionCents: _parse(_promotionCtrl.text),
-          cancellationCents: _parse(_cancellationCtrl.text),
+          grossAmountCents: parseCents(_grossCtrl.text),
+          bonusAmountCents: parseCents(_bonusCtrl.text),
+          tipAmountCents: parseCents(_tipCtrl.text),
+          promotionCents: parseCents(_promotionCtrl.text),
+          cancellationCents: parseCents(_cancellationCtrl.text),
           tripDate: _tripDate,
           notes: _notesCtrl.text,
         );

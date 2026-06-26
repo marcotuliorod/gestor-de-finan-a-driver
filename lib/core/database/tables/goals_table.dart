@@ -10,8 +10,7 @@ class Goals extends Table {
   DateTimeColumn get periodEnd => dateTime()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
-  TextColumn get syncStatus =>
-      text().withDefault(const Constant('pending'))();
+  TextColumn get syncStatus => text().withDefault(const Constant('pending'))();
   DateTimeColumn get syncedAt => dateTime().nullable()();
 
   @override

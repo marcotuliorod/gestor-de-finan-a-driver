@@ -21,16 +21,12 @@ class MaintenanceListPage extends ConsumerWidget {
             const Center(child: Text('Erro ao carregar manutenções')),
         data: (records) => records.isEmpty
             ? _EmptyState(onAdd: () => _openForm(context))
-            : ListView.separated(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: records.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, i) => _MaintenanceTile(
-                  record: records[i],
-                  onDelete: () => ref
-                      .read(maintenanceNotifierProvider.notifier)
-                      .deleteRecord(records[i].id),
-                ),
+            : _MaintenanceContent(
+                records: records,
+                onDelete: (id) => ref
+                    .read(maintenanceNotifierProvider.notifier)
+                    .deleteRecord(id),
+                onAdd: () => _openForm(context),
               ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -43,6 +39,179 @@ class MaintenanceListPage extends ConsumerWidget {
   Future<void> _openForm(BuildContext context) async {
     await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const MaintenanceFormPage()),
+    );
+  }
+}
+
+class _MaintenanceContent extends StatelessWidget {
+  const _MaintenanceContent({
+    required this.records,
+    required this.onDelete,
+    required this.onAdd,
+  });
+
+  final List<MaintenanceRecord> records;
+  final void Function(String id) onDelete;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalCents = records.fold<int>(0, (s, r) => s + r.costCents);
+
+    final upcoming = records
+        .where((r) => r.nextMaintenanceKm != null || r.nextMaintenanceDate != null)
+        .toList()
+      ..sort((a, b) {
+        final aDate = a.nextMaintenanceDate;
+        final bDate = b.nextMaintenanceDate;
+        if (aDate != null && bDate != null) return aDate.compareTo(bDate);
+        if (aDate != null) return -1;
+        if (bDate != null) return 1;
+        return (a.nextMaintenanceKm ?? 0).compareTo(b.nextMaintenanceKm ?? 0);
+      });
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      children: [
+        _CostSummaryCard(totalCents: totalCents, count: records.length),
+        if (upcoming.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          _SectionHeader(title: 'Próximas Revisões (${upcoming.length})'),
+          ...upcoming.map((r) => _UpcomingTile(record: r)),
+          const Divider(height: 1),
+        ],
+        const _SectionHeader(title: 'Histórico'),
+        ...records.asMap().entries.map((entry) {
+          final i = entry.key;
+          final r = entry.value;
+          return Column(
+            children: [
+              _MaintenanceTile(
+                record: r,
+                onDelete: () => onDelete(r.id),
+              ),
+              if (i < records.length - 1) const Divider(height: 1),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _CostSummaryCard extends StatelessWidget {
+  const _CostSummaryCard({required this.totalCents, required this.count});
+
+  final int totalCents;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const CircleAvatar(
+              backgroundColor: Color(0xFFE3F2FD),
+              child: Icon(Icons.build_rounded, color: Colors.blue, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Total em manutenções',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    formatCurrency(totalCents),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.expense,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              '$count serviços',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.textSecondary,
+              letterSpacing: 0.6,
+            ),
+      ),
+    );
+  }
+}
+
+class _UpcomingTile extends StatelessWidget {
+  const _UpcomingTile({required this.record});
+
+  final MaintenanceRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final isUrgent = record.nextMaintenanceDate != null &&
+        record.nextMaintenanceDate!.difference(now).inDays <= 7;
+    final urgentColor = isUrgent ? AppColors.warning : AppColors.income;
+
+    String subtitle = '';
+    if (record.nextMaintenanceDate != null) {
+      final days = record.nextMaintenanceDate!.difference(now).inDays;
+      if (days < 0) {
+        subtitle = 'Atrasada há ${-days} dias';
+      } else if (days == 0) {
+        subtitle = 'Hoje';
+      } else {
+        subtitle = 'Em $days dias (${formatDate(record.nextMaintenanceDate!)})';
+      }
+    } else if (record.nextMaintenanceKm != null) {
+      subtitle = 'Próxima em ${record.nextMaintenanceKm} km';
+    }
+
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: urgentColor.withOpacity(0.12),
+        child: Icon(
+          Icons.schedule_rounded,
+          color: urgentColor,
+          size: 20,
+        ),
+      ),
+      title: Text(record.type),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(color: urgentColor, fontSize: 12),
+      ),
     );
   }
 }

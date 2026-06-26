@@ -108,6 +108,8 @@ class _EmptyState extends StatelessWidget {
     'Quantas corridas fiz essa semana?',
     'Estou batendo minha meta?',
     'Qual minha maior despesa?',
+    'Quanto gastei com combustível?',
+    'Qual minha plataforma mais lucrativa?',
   ];
 
   @override

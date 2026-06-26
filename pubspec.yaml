@@ -46,6 +46,9 @@ dependencies:
   csv: ^6.0.0
   share_plus: ^10.0.0
 
+  # Local notifications (maintenance alerts, goal achievement)
+  flutter_local_notifications: ^17.0.0
+
   # Observability
   sentry_flutter: ^8.1.0
 

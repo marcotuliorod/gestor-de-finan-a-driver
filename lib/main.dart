@@ -1,5 +1,6 @@
 import 'package:driver_finance/app.dart';
 import 'package:driver_finance/core/network/supabase_client.dart';
+import 'package:driver_finance/core/notifications/notification_service.dart';
 import 'package:driver_finance/core/providers/shared_preferences_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +21,8 @@ Future<void> main() async {
       anonKey: supabaseAnonKey,
     );
   }
+
+  await NotificationService.instance.init();
 
   final prefs = await SharedPreferences.getInstance();
 

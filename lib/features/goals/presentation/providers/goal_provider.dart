@@ -1,4 +1,4 @@
-import 'package:driver_finance/core/database/app_database.dart';
+import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
 import 'package:driver_finance/features/goals/data/repositories/goal_repository_impl.dart';
 import 'package:driver_finance/features/goals/domain/entities/financial_goal.dart';
@@ -10,7 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 final goalRepositoryProvider = Provider<GoalRepository>((ref) {
   return GoalRepositoryImpl(
-    database: ref.watch(appDatabaseProvider),
+    database: ref.watch($db.appDatabaseProvider),
     supabase: Supabase.instance.client,
   );
 });

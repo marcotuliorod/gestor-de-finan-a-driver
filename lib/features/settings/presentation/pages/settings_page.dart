@@ -1,5 +1,9 @@
 import 'package:driver_finance/core/ui/theme/app_colors.dart';
+import 'package:driver_finance/core/utils/currency_formatter.dart';
 import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
+import 'package:driver_finance/features/goals/presentation/pages/goal_form_page.dart';
+import 'package:driver_finance/features/goals/presentation/providers/goal_provider.dart';
+import 'package:driver_finance/features/settings/presentation/providers/theme_provider.dart';
 import 'package:driver_finance/features/vehicle/presentation/pages/vehicle_form_page.dart';
 import 'package:driver_finance/features/vehicle/presentation/providers/vehicle_provider.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +17,8 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authRepositoryProvider).currentUser;
     final vehicleAsync = ref.watch(watchVehicleProvider);
+    final goalAsync = ref.watch(watchCurrentGoalProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
@@ -54,11 +60,63 @@ class SettingsPage extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.go('/platforms'),
           ),
-          ListTile(
-            leading: const Icon(Icons.flag_outlined),
-            title: const Text('Metas'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+          goalAsync.when(
+            loading: () => const ListTile(
+              leading: Icon(Icons.flag_outlined),
+              title: Text('Metas'),
+              trailing: CircularProgressIndicator(),
+            ),
+            error: (_, __) => const SizedBox(),
+            data: (goal) => ListTile(
+              leading: const Icon(Icons.flag_outlined),
+              title: const Text('Metas'),
+              subtitle: goal != null
+                  ? Text('${formatCurrency(goal.monthlyTargetCents)}/mês')
+                  : const Text('Nenhuma definida'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<bool>(
+                  builder: (_) => GoalFormPage(existingGoal: goal),
+                ),
+              ),
+            ),
+          ),
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Text(
+              'Aparência',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    letterSpacing: 0.8,
+                  ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: SegmentedButton<ThemeMode>(
+              segments: const [
+                ButtonSegment(
+                  value: ThemeMode.system,
+                  icon: Icon(Icons.brightness_auto_rounded),
+                  label: Text('Auto'),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.light,
+                  icon: Icon(Icons.light_mode_rounded),
+                  label: Text('Claro'),
+                ),
+                ButtonSegment(
+                  value: ThemeMode.dark,
+                  icon: Icon(Icons.dark_mode_rounded),
+                  label: Text('Escuro'),
+                ),
+              ],
+              selected: {themeMode},
+              onSelectionChanged: (selection) => ref
+                  .read(themeModeProvider.notifier)
+                  .setMode(selection.first),
+            ),
           ),
           const Divider(),
           ListTile(

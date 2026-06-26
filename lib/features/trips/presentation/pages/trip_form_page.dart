@@ -157,9 +157,13 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
                   FilteringTextInputFormatter.digitsOnly,
                 ],
                 validator: (v) {
-                  if (v == null || v.isEmpty) return null;
+                  if (v == null || v.isEmpty) {
+                    return null;
+                  }
                   final val = int.tryParse(v);
-                  if (val == null || val <= 0) return 'Informe um número válido';
+                  if (val == null || val <= 0) {
+                    return 'Informe um número válido';
+                  }
                   return null;
                 },
               ),

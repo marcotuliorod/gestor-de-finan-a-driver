@@ -1,4 +1,5 @@
 import 'package:driver_finance/core/ui/theme/app_colors.dart';
+import 'package:driver_finance/core/utils/currency_formatter.dart';
 import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:driver_finance/features/vehicle/domain/entities/vehicle.dart';
 import 'package:driver_finance/features/vehicle/presentation/providers/vehicle_provider.dart';
@@ -151,6 +152,10 @@ class _VehicleFormPageState extends ConsumerState<VehicleFormPage> {
                 return null;
               },
             ),
+            if (widget.existingVehicle != null) ...[
+              const SizedBox(height: 24),
+              _RoiCard(vehicle: widget.existingVehicle!),
+            ],
             const SizedBox(height: 32),
             FilledButton(
               onPressed: isLoading ? null : _submit,
@@ -208,6 +213,97 @@ class _VehicleFormPageState extends ConsumerState<VehicleFormPage> {
         if (!mounted) return;
         Navigator.of(context).pop(true);
       },
+    );
+  }
+}
+
+class _RoiCard extends StatelessWidget {
+  const _RoiCard({required this.vehicle});
+
+  final Vehicle vehicle;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final monthsOwned =
+        ((now.year - vehicle.year) * 12 + now.month).clamp(1, vehicle.usefulLifeMonths);
+    final depreciationAccumulated =
+        vehicle.monthlyDepreciationCents * monthsOwned;
+    final estimatedValue =
+        (vehicle.purchasePriceCents - depreciationAccumulated).clamp(0, vehicle.purchasePriceCents);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ROI do Veículo',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            _RoiRow(
+              label: 'Valor de compra',
+              value: formatCurrency(vehicle.purchasePriceCents),
+              color: AppColors.income,
+            ),
+            _RoiRow(
+              label: 'Depreciação acumulada (~${monthsOwned}m)',
+              value: '- ${formatCurrency(depreciationAccumulated)}',
+              color: AppColors.expense,
+            ),
+            const Divider(height: 16),
+            _RoiRow(
+              label: 'Valor atual estimado',
+              value: formatCurrency(estimatedValue),
+              color: estimatedValue > 0 ? AppColors.income : AppColors.textSecondary,
+              bold: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RoiRow extends StatelessWidget {
+  const _RoiRow({
+    required this.label,
+    required this.value,
+    required this.color,
+    this.bold = false,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+  final bool bold;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: color,
+                  fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }

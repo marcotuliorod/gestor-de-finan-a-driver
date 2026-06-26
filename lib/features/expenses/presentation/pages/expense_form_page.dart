@@ -22,6 +22,8 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
 
   ExpenseCategory _category = ExpenseCategory.other;
   DateTime _expenseDate = DateTime.now();
+  bool _isRecurring = false;
+  String _recurrenceType = 'monthly';
 
   static const _categories = [
     ExpenseCategory.carWash,
@@ -107,6 +109,33 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
                 title: Text('Data: ${formatDate(_expenseDate)}'),
                 onTap: _pickDate,
               ),
+              const SizedBox(height: 4),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Despesa recorrente'),
+                subtitle: const Text('IPVA, seguro, financiamento…'),
+                value: _isRecurring,
+                onChanged: (v) => setState(() => _isRecurring = v),
+              ),
+              if (_isRecurring) ...[
+                const SizedBox(height: 4),
+                DropdownButtonFormField<String>(
+                  value: _recurrenceType,
+                  decoration: const InputDecoration(
+                    labelText: 'Frequência',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'monthly', child: Text('Mensal')),
+                    DropdownMenuItem(
+                        value: 'quarterly', child: Text('Trimestral')),
+                    DropdownMenuItem(
+                        value: 'semiannual', child: Text('Semestral')),
+                    DropdownMenuItem(value: 'yearly', child: Text('Anual')),
+                  ],
+                  onChanged: (v) => setState(() => _recurrenceType = v!),
+                ),
+              ],
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _save,
@@ -150,6 +179,8 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
               amountCents: amountCents,
               description: _descCtrl.text,
               expenseDate: _expenseDate,
+              isRecurring: _isRecurring,
+              recurrenceType: _isRecurring ? _recurrenceType : null,
             );
 
     if (!mounted) return;

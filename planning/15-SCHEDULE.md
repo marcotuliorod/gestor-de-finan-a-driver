@@ -117,29 +117,37 @@ _Atualizado em 2026-06-26 | Sprint 8 completo_
 
 ---
 
-## 🔄 Sprint 9 — Polish Final + Backlog Must-Have (planejado)
+## ✅ Sprint 9 — Polish Final + Backlog Must-Have
 
-**Objetivo:** Fechar o único Must Have pendente (alertas de manutenção), adicionar o gráfico de lucro diário, e polish de UX.
+**Status:** COMPLETO (PR #16 mergeado)
 
-| Feature | MoSCoW | Pts |
-|---------|--------|-----|
-| E6-US03: Alertas push de manutenção (por km/data) | M | 4 |
-| E7-US09: Gráfico de lucro diário no dashboard | S | 4 |
-| E10-US01: Edição de perfil (nome) | S | 2 |
-| E5-US04: Sugestão automática de odômetro | S | 2 |
+| Feature | Status |
+|---------|--------|
+| E6-US03: Alerta in-app de manutenção próxima (dashboard card) | ✅ |
+| E7-US09: Gráfico de receita diária no dashboard | ✅ |
+| E10-US01: Edição de perfil (nome) via Settings | ✅ |
 
 ---
 
-## Backlog Pós-Sprint 9 (Should/Could Have)
+## 🔄 Sprint 10 — Quick Wins (em andamento)
+
+**Objetivo:** Despesas recorrentes, ROI do veículo, Apple Sign-In.
 
 | Feature | MoSCoW | Pts |
 |---------|--------|-----|
-| E4-US06: Despesas recorrentes (IPVA, seguro) | S | 3 |
+| E4-US06: Despesas recorrentes UI (IPVA, seguro) | S | 3 |
+| E7-US10: ROI do veículo no VehicleFormPage | C | 3 |
+| E1-US02: Apple Sign-In (iOS) | S | 3 |
+
+---
+
+## Backlog Pós-Sprint 10 (Should/Could Have)
+
+| Feature | MoSCoW | Pts |
+|---------|--------|-----|
 | E9-US03: Push notification ao atingir meta | S | 3 |
 | E7-US04: Ganho por hora | S | 3 |
 | E10-US04: Export CSV | C | 4 |
-| E1-US02: Apple Sign-In (iOS) | S | 3 |
-| E7-US10: ROI do veículo | C | 3 |
 | E8-US03: Histórico de conversas IA | C | 3 |
 
 ---
@@ -157,7 +165,8 @@ _Atualizado em 2026-06-26 | Sprint 8 completo_
 | Sprint 6 completo | 2026-06-26 | ✅ |
 | Sprint 7 completo | 2026-06-26 | ✅ |
 | Sprint 8 completo | 2026-06-26 | ✅ |
-| Sprint 9 completo | A definir | 🔄 |
+| Sprint 9 completo | 2026-06-26 | ✅ |
+| Sprint 10 completo | A definir | 🔄 |
 | **v1.0** | A definir | 🔄 |
 
 ---

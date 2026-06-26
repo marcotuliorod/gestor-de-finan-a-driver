@@ -3,6 +3,7 @@ import 'package:driver_finance/features/auth/data/repositories/auth_repository_i
 import 'package:driver_finance/features/auth/domain/entities/app_user.dart';
 import 'package:driver_finance/features/auth/domain/repositories/auth_repository.dart';
 import 'package:driver_finance/features/auth/domain/usecases/delete_account.dart';
+import 'package:driver_finance/features/auth/domain/usecases/sign_in_with_apple.dart';
 import 'package:driver_finance/features/auth/domain/usecases/sign_in_with_google.dart';
 import 'package:driver_finance/features/auth/domain/usecases/sign_out.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,15 @@ class AuthNotifier extends AsyncNotifier<void> {
   Future<Either<Failure, AppUser>> signInWithGoogle() async {
     state = const AsyncLoading();
     final result = await SignInWithGoogleUseCase(
+      ref.read(authRepositoryProvider),
+    )();
+    state = const AsyncData(null);
+    return result;
+  }
+
+  Future<Either<Failure, AppUser>> signInWithApple() async {
+    state = const AsyncLoading();
+    final result = await SignInWithAppleUseCase(
       ref.read(authRepositoryProvider),
     )();
     state = const AsyncData(null);

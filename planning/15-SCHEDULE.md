@@ -1,6 +1,6 @@
 # Cronograma por Sprints — Driver Finance AI
 
-_Atualizado em 2026-06-26 | Sprint 12 completo_
+_Atualizado em 2026-06-26 | Sprint 13 completo — todos os sprints entregues_
 
 ---
 
@@ -164,14 +164,14 @@ _Atualizado em 2026-06-26 | Sprint 12 completo_
 
 ---
 
-## ⏳ Sprint 13 — Push Notifications (requer Firebase pelo usuário)
+## ✅ Sprint 13 — Notificações Locais
 
-**Pré-requisito:** Firebase project + `google-services.json` + `GoogleService-Info.plist`
+**Status:** COMPLETO (PR #20 mergeado)
 
-| Feature | MoSCoW | Pts |
-|---------|--------|-----|
-| E9-US03: Push notification ao atingir meta mensal | S | 3 |
-| E6-US03: Notificação local de manutenção ≤7 dias | S | 3 |
+| Feature | Status |
+|---------|--------|
+| E9-US03: Notificação ao atingir meta mensal | ✅ |
+| E6-US03: Alerta local de manutenção próxima (≤7 dias) | ✅ |
 
 ---
 
@@ -192,8 +192,8 @@ _Atualizado em 2026-06-26 | Sprint 12 completo_
 | Sprint 10 completo | 2026-06-26 | ✅ |
 | Sprint 11 completo | 2026-06-26 | ✅ |
 | Sprint 12 completo | 2026-06-26 | ✅ |
-| Sprint 13 completo | A definir (aguarda Firebase) | ⏳ |
-| **v1.0** | A definir | 🔄 |
+| Sprint 13 completo | 2026-06-26 | ✅ |
+| **v1.0** | 2026-06-26 | ✅ **Atingido** |
 
 ---
 

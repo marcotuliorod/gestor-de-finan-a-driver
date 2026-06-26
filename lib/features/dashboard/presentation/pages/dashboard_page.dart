@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:driver_finance/core/notifications/goal_notification_service.dart';
 import 'package:driver_finance/core/notifications/maintenance_alert_scheduler.dart';
 import 'package:driver_finance/core/ui/theme/app_colors.dart';
@@ -64,7 +66,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         if (prev == null) return;
         final records = next.valueOrNull;
         if (records != null) {
-          MaintenanceAlertScheduler.rescheduleAll(records);
+          unawaited(MaintenanceAlertScheduler.rescheduleAll(records));
         }
       },
     );
@@ -76,7 +78,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         final wasNotMet = (prev.goalProgress ?? 0) < 1.0;
         final isNowMet = (next?.goalProgress ?? 0) >= 1.0;
         if (wasNotMet && isNowMet) {
-          GoalNotificationService.notifyGoalReached();
+          unawaited(GoalNotificationService.notifyGoalReached());
         }
       },
     );

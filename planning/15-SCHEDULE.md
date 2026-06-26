@@ -129,26 +129,35 @@ _Atualizado em 2026-06-26 | Sprint 8 completo_
 
 ---
 
-## 🔄 Sprint 10 — Quick Wins (em andamento)
+## ✅ Sprint 10 — Quick Wins
 
-**Objetivo:** Despesas recorrentes, ROI do veículo, Apple Sign-In.
+**Status:** COMPLETO (PR #17 mergeado)
 
-| Feature | MoSCoW | Pts |
-|---------|--------|-----|
-| E4-US06: Despesas recorrentes UI (IPVA, seguro) | S | 3 |
-| E7-US10: ROI do veículo no VehicleFormPage | C | 3 |
-| E1-US02: Apple Sign-In (iOS) | S | 3 |
+| Feature | Status |
+|---------|--------|
+| E4-US06: Despesas recorrentes UI (IPVA, seguro) | ✅ |
+| E7-US10: ROI do veículo no VehicleFormPage | ✅ |
+| E1-US02: Apple Sign-In (iOS) | ✅ |
 
 ---
 
-## Backlog Pós-Sprint 10 (Should/Could Have)
+## ✅ Sprint 11 — Dados e Exportação
+
+**Status:** COMPLETO (PR #18 mergeado)
+
+| Feature | Status |
+|---------|--------|
+| E8-US03: Histórico de conversas IA (Drift + ConversationListPage) | ✅ |
+| E10-US04: Export CSV de corridas e despesas + share_plus | ✅ |
+
+---
+
+## Backlog Pós-Sprint 11 (Should Have)
 
 | Feature | MoSCoW | Pts |
 |---------|--------|-----|
 | E9-US03: Push notification ao atingir meta | S | 3 |
-| E7-US04: Ganho por hora | S | 3 |
-| E10-US04: Export CSV | C | 4 |
-| E8-US03: Histórico de conversas IA | C | 3 |
+| E7-US04: Ganho por hora (requer migration `duration_minutes`) | S | 3 |
 
 ---
 
@@ -166,7 +175,8 @@ _Atualizado em 2026-06-26 | Sprint 8 completo_
 | Sprint 7 completo | 2026-06-26 | ✅ |
 | Sprint 8 completo | 2026-06-26 | ✅ |
 | Sprint 9 completo | 2026-06-26 | ✅ |
-| Sprint 10 completo | A definir | 🔄 |
+| Sprint 10 completo | 2026-06-26 | ✅ |
+| Sprint 11 completo | 2026-06-26 | ✅ |
 | **v1.0** | A definir | 🔄 |
 
 ---

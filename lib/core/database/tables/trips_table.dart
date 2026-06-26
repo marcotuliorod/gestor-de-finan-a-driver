@@ -10,6 +10,7 @@ class Trips extends Table {
   IntColumn get tipAmountCents => integer().withDefault(const Constant(0))();
   IntColumn get promotionCents => integer().withDefault(const Constant(0))();
   IntColumn get cancellationCents => integer().withDefault(const Constant(0))();
+  IntColumn get durationMinutes => integer().nullable()();
   DateTimeColumn get tripDate => dateTime()();
   TextColumn get notes => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();

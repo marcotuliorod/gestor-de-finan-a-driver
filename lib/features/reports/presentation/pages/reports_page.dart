@@ -109,6 +109,13 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                 ),
                 const SizedBox(height: 16),
                 _SummaryRow(summary: summary),
+                if (summary.earningsPerHourCents != null) ...[
+                  const SizedBox(height: 12),
+                  _HourlyEarningsCard(
+                    earningsPerHourCents: summary.earningsPerHourCents!,
+                    totalDurationMinutes: summary.totalDurationMinutes,
+                  ),
+                ],
                 const SizedBox(height: 24),
                 _IncomeBarChart(summary: summary),
                 const SizedBox(height: 24),
@@ -565,6 +572,61 @@ class _PlatformBreakdown extends ConsumerWidget {
                 ),
               );
             }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HourlyEarningsCard extends StatelessWidget {
+  const _HourlyEarningsCard({
+    required this.earningsPerHourCents,
+    required this.totalDurationMinutes,
+  });
+
+  final int earningsPerHourCents;
+  final int totalDurationMinutes;
+
+  @override
+  Widget build(BuildContext context) {
+    final hours = totalDurationMinutes ~/ 60;
+    final minutes = totalDurationMinutes % 60;
+    final durationLabel = hours > 0 ? '${hours}h${minutes.toString().padLeft(2, '0')}min' : '${minutes}min';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            const Icon(Icons.schedule_outlined, color: AppColors.primary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ganho por hora',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                  Text(
+                    formatCurrency(earningsPerHourCents),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.income,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              'Total: $durationLabel',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
           ],
         ),
       ),

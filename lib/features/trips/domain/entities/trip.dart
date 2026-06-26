@@ -8,6 +8,7 @@ class Trip {
     this.tipAmountCents = 0,
     this.promotionCents = 0,
     this.cancellationCents = 0,
+    this.durationMinutes,
     required this.tripDate,
     this.notes,
     required this.createdAt,
@@ -21,6 +22,7 @@ class Trip {
   final int tipAmountCents;
   final int promotionCents;
   final int cancellationCents;
+  final int? durationMinutes;
   final DateTime tripDate;
   final String? notes;
   final DateTime createdAt;
@@ -38,6 +40,7 @@ class Trip {
     int? tipAmountCents,
     int? promotionCents,
     int? cancellationCents,
+    int? durationMinutes,
     DateTime? tripDate,
     String? notes,
   }) =>
@@ -50,6 +53,7 @@ class Trip {
         tipAmountCents: tipAmountCents ?? this.tipAmountCents,
         promotionCents: promotionCents ?? this.promotionCents,
         cancellationCents: cancellationCents ?? this.cancellationCents,
+        durationMinutes: durationMinutes ?? this.durationMinutes,
         tripDate: tripDate ?? this.tripDate,
         notes: notes ?? this.notes,
         createdAt: createdAt,

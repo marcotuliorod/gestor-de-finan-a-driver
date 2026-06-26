@@ -44,6 +44,8 @@ final reportsSummaryProvider =
     otherExpenseCents: expenses.fold<int>(0, (s, e) => s + e.amountCents),
     tripCount: trips.length,
     dailyIncomes: dailyIncomes,
+    totalDurationMinutes:
+        trips.fold<int>(0, (s, t) => s + (t.durationMinutes ?? 0)),
   );
 });
 

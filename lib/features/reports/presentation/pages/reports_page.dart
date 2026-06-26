@@ -1,5 +1,6 @@
 import 'package:driver_finance/core/ui/theme/app_colors.dart';
 import 'package:driver_finance/core/utils/currency_formatter.dart';
+import 'package:driver_finance/features/reports/domain/entities/platform_stats.dart';
 import 'package:driver_finance/features/reports/domain/entities/reports_summary.dart';
 import 'package:driver_finance/features/reports/presentation/providers/reports_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -65,6 +66,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                 _IncomeBarChart(summary: summary),
                 const SizedBox(height: 24),
                 _ExpensePieChart(summary: summary),
+                const SizedBox(height: 24),
+                _PlatformBreakdown(period: range),
                 const SizedBox(height: 16),
               ],
             ),
@@ -401,6 +404,120 @@ class _ExpensePieChart extends StatelessWidget {
                   ),
                 ],
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlatformBreakdown extends ConsumerWidget {
+  const _PlatformBreakdown({required this.period});
+
+  final (DateTime, DateTime) period;
+
+  static const _platformColors = {
+    'Uber': Color(0xFF1A1A1A),
+    '99': Color(0xFFF6AE00),
+    'inDrive': Color(0xFF5BB543),
+    'Táxi': Color(0xFF1565C0),
+    'Delivery': Color(0xFFE65100),
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(platformStatsProvider(period));
+    if (stats.isEmpty) return const SizedBox.shrink();
+
+    final totalIncome = stats.fold<int>(0, (s, p) => s + p.incomeCents);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Receita por plataforma',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            ...stats.map((s) {
+              final color =
+                  _platformColors[s.platformName] ?? AppColors.primary;
+              final pct = totalIncome > 0
+                  ? s.incomeCents / totalIncome
+                  : 0.0;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            s.platformName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        Text(
+                          formatCurrency(s.incomeCents),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: pct,
+                        minHeight: 6,
+                        backgroundColor: color.withOpacity(0.15),
+                        valueColor: AlwaysStoppedAnimation<Color>(color),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          '${s.tripCount} corridas',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Ticket médio: ${formatCurrency(s.averageCents)}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),

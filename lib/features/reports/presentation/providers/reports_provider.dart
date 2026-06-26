@@ -1,5 +1,7 @@
 import 'package:driver_finance/features/expenses/presentation/providers/expense_provider.dart';
 import 'package:driver_finance/features/fuel/presentation/providers/fuel_provider.dart';
+import 'package:driver_finance/features/platform/presentation/providers/platform_provider.dart';
+import 'package:driver_finance/features/reports/domain/entities/platform_stats.dart';
 import 'package:driver_finance/features/reports/domain/entities/reports_summary.dart';
 import 'package:driver_finance/features/trips/presentation/providers/trip_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,4 +45,35 @@ final reportsSummaryProvider =
     tripCount: trips.length,
     dailyIncomes: dailyIncomes,
   );
+});
+
+final platformStatsProvider =
+    Provider.family<List<PlatformStats>, (DateTime, DateTime)>((ref, period) {
+  final tripsAsync = ref.watch(watchTripsProvider(period));
+  final platformsAsync = ref.watch(watchPlatformsProvider);
+
+  final trips = tripsAsync.valueOrNull ?? [];
+  final platforms = platformsAsync.valueOrNull ?? [];
+
+  final platformMap = {for (final p in platforms) p.id: p.displayName};
+
+  final statsMap = <String, (int, int)>{};
+  for (final trip in trips) {
+    final current = statsMap[trip.platformId] ?? (0, 0);
+    statsMap[trip.platformId] = (
+      current.$1 + trip.totalIncomeCents,
+      current.$2 + 1,
+    );
+  }
+
+  return statsMap.entries
+      .map(
+        (e) => PlatformStats(
+          platformName: platformMap[e.key] ?? e.key,
+          incomeCents: e.value.$1,
+          tripCount: e.value.$2,
+        ),
+      )
+      .toList()
+    ..sort((a, b) => b.incomeCents.compareTo(a.incomeCents));
 });

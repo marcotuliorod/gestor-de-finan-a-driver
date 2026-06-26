@@ -102,7 +102,7 @@ class _FuelTab extends ConsumerWidget {
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (records) {
         if (records.isEmpty) {
-          return _EmptyState(
+          return const _EmptyState(
             icon: Icons.local_gas_station_rounded,
             message: 'Nenhum abastecimento registrado',
           );
@@ -164,12 +164,12 @@ class _ExpensesTab extends ConsumerWidget {
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (expenses) {
         if (expenses.isEmpty) {
-          return _EmptyState(
+          return const _EmptyState(
             icon: Icons.receipt_long_outlined,
             message: 'Nenhuma despesa este mês',
           );
         }
-        final total = expenses.fold(0, (s, e) => s + e.amountCents);
+        final total = expenses.fold<int>(0, (s, e) => s + e.amountCents);
         return Column(
           children: [
             _TotalBanner(totalCents: total),
@@ -195,7 +195,7 @@ class _ExpenseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: AppColors.expense.withValues(alpha: 0.1),
+        backgroundColor: AppColors.expense.withOpacity(0.1),
         child: const Icon(
           Icons.receipt_outlined,
           color: AppColors.expense,
@@ -231,7 +231,7 @@ class _MileageTab extends ConsumerWidget {
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (records) {
         if (records.isEmpty) {
-          return _EmptyState(
+          return const _EmptyState(
             icon: Icons.speed_rounded,
             message: 'Nenhum km registrado este mês',
           );
@@ -240,7 +240,7 @@ class _MileageTab extends ConsumerWidget {
         return Column(
           children: [
             Container(
-              color: AppColors.primary.withValues(alpha: 0.08),
+              color: AppColors.primary.withOpacity(0.08),
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 10,
@@ -311,7 +311,7 @@ class _TotalBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.expense.withValues(alpha: 0.08),
+      color: AppColors.expense.withOpacity(0.08),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

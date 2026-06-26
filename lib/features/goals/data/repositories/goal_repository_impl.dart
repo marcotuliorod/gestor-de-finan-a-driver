@@ -20,9 +20,6 @@ class GoalRepositoryImpl implements GoalRepository {
   @override
   Stream<FinancialGoal?> watchCurrentGoal() {
     final now = DateTime.now();
-    final monthStart = DateTime(now.year, now.month, 1);
-    final monthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-
     return (_db.select(_db.goals)
           ..where((t) =>
               t.periodStart.isSmallerOrEqualValue(now) &

@@ -11,7 +11,7 @@ abstract final class AppTheme {
         surface: AppColors.surface,
       ),
       scaffoldBackgroundColor: AppColors.background,
-      cardTheme: const CardThemeData(
+      cardTheme: const CardTheme(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),
@@ -50,7 +50,7 @@ abstract final class AppTheme {
         surface: AppColors.surfaceDark,
       ),
       scaffoldBackgroundColor: AppColors.backgroundDark,
-      cardTheme: const CardThemeData(
+      cardTheme: const CardTheme(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),

@@ -1,3 +1,5 @@
+import 'package:driver_finance/features/dashboard/domain/entities/daily_revenue.dart';
+
 class DashboardSummary {
   const DashboardSummary({
     required this.totalIncomeCents,
@@ -7,6 +9,7 @@ class DashboardSummary {
     this.depreciationCents = 0,
     this.monthlyGoalCents,
     this.goalProgress,
+    this.dailyRevenues = const [],
   });
 
   final int totalIncomeCents;
@@ -16,6 +19,7 @@ class DashboardSummary {
   final int depreciationCents;
   final int? monthlyGoalCents;
   final double? goalProgress;
+  final List<DailyRevenue> dailyRevenues;
 
   int get totalExpensesCents =>
       otherExpenseCents + fuelExpenseCents + depreciationCents;

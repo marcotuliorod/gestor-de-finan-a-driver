@@ -86,6 +86,18 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, Unit>> updateDisplayName(String name) async {
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(data: {'full_name': name}),
+      );
+      return right(unit);
+    } catch (e) {
+      return left(UnexpectedFailure(e.toString()));
+    }
+  }
+
   AppUser _toAppUser(User user) => AppUser(
         id: user.id,
         email: user.email ?? '',

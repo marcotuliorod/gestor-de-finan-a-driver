@@ -52,6 +52,14 @@ class AuthNotifier extends AsyncNotifier<void> {
     state = const AsyncData(null);
     return result;
   }
+
+  Future<Either<Failure, Unit>> updateDisplayName(String name) async {
+    state = const AsyncLoading();
+    final result =
+        await ref.read(authRepositoryProvider).updateDisplayName(name);
+    state = const AsyncData(null);
+    return result;
+  }
 }
 
 final authNotifierProvider =

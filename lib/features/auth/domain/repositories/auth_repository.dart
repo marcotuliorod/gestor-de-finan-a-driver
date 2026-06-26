@@ -8,4 +8,5 @@ abstract interface class AuthRepository {
   Future<Either<Failure, AppUser>> signInWithGoogle();
   Future<Either<Failure, Unit>> signOut();
   Future<Either<Failure, Unit>> deleteAccount();
+  Future<Either<Failure, Unit>> updateDisplayName(String name);
 }

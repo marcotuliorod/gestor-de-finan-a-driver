@@ -1,11 +1,15 @@
 import 'package:driver_finance/core/ui/theme/app_colors.dart';
 import 'package:driver_finance/core/utils/currency_formatter.dart';
+import 'package:driver_finance/features/dashboard/domain/entities/daily_revenue.dart';
 import 'package:driver_finance/features/dashboard/domain/entities/dashboard_summary.dart';
 import 'package:driver_finance/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:driver_finance/features/expenses/presentation/pages/expense_form_page.dart';
 import 'package:driver_finance/features/fuel/presentation/pages/fuel_form_page.dart';
 import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_form_page.dart';
+import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_list_page.dart';
+import 'package:driver_finance/features/maintenance/presentation/providers/maintenance_provider.dart';
 import 'package:driver_finance/features/trips/presentation/pages/trip_form_page.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,6 +62,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                const _MaintenanceAlertCard(),
                 _PeriodSelector(
                   selected: _period,
                   onChanged: (p) => setState(() => _period = p),
@@ -71,9 +76,174 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ],
                 _ExpenseBreakdown(summary: summary),
                 const SizedBox(height: 16),
+                _DailyRevenueChart(dailyRevenues: summary.dailyRevenues),
+                if (summary.dailyRevenues.isNotEmpty) const SizedBox(height: 16),
                 const _QuickActions(),
               ],
             ),
+    );
+  }
+}
+
+class _MaintenanceAlertCard extends ConsumerWidget {
+  const _MaintenanceAlertCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final records = ref.watch(watchMaintenanceProvider).valueOrNull ?? [];
+    final now = DateTime.now();
+    final threshold = now.add(const Duration(days: 7));
+    final alerts = records.where((r) {
+      if (r.nextMaintenanceDate != null &&
+          !r.nextMaintenanceDate!.isAfter(threshold)) {
+        return true;
+      }
+      return false;
+    }).toList();
+
+    if (alerts.isEmpty) return const SizedBox.shrink();
+
+    final overdue = alerts.where((r) =>
+        r.nextMaintenanceDate != null &&
+        r.nextMaintenanceDate!.isBefore(now)).length;
+    final label = overdue > 0
+        ? '$overdue manutenção(ões) em atraso'
+        : '${alerts.length} manutenção(ões) próxima(s)';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        color: AppColors.warning.withOpacity(0.12),
+        child: ListTile(
+          leading: Icon(
+            Icons.warning_amber_rounded,
+            color: overdue > 0 ? AppColors.expense : AppColors.warning,
+          ),
+          title: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: overdue > 0 ? AppColors.expense : AppColors.warning,
+            ),
+          ),
+          subtitle: const Text('Toque para ver detalhes'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const MaintenanceListPage(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DailyRevenueChart extends StatelessWidget {
+  const _DailyRevenueChart({required this.dailyRevenues});
+
+  final List<DailyRevenue> dailyRevenues;
+
+  @override
+  Widget build(BuildContext context) {
+    if (dailyRevenues.isEmpty) return const SizedBox.shrink();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 16, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Text(
+                'Receita por dia',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 140,
+              child: BarChart(
+                BarChartData(
+                  barGroups: dailyRevenues.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final d = entry.value;
+                    return BarChartGroupData(
+                      x: i,
+                      barRods: [
+                        BarChartRodData(
+                          toY: d.amountCents / 100,
+                          color: AppColors.income,
+                          width: dailyRevenues.length > 15 ? 8 : 14,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(3),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                  titlesData: FlTitlesData(
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 28,
+                        getTitlesWidget: (value, meta) {
+                          final i = value.toInt();
+                          if (i < 0 || i >= dailyRevenues.length) {
+                            return const SizedBox();
+                          }
+                          final date = dailyRevenues[i].date;
+                          if (dailyRevenues.length > 15 && date.day % 5 != 0) {
+                            return const SizedBox();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              '${date.day}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  gridData: const FlGridData(show: false),
+                  borderData: FlBorderData(show: false),
+                  barTouchData: BarTouchData(
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        return BarTooltipItem(
+                          formatCurrency((rod.toY * 100).round()),
+                          const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'package:driver_finance/core/notifications/goal_notification_service.dart';
+import 'package:driver_finance/core/notifications/maintenance_alert_scheduler.dart';
 import 'package:driver_finance/core/ui/theme/app_colors.dart';
 import 'package:driver_finance/core/utils/currency_formatter.dart';
 import 'package:driver_finance/features/dashboard/domain/entities/daily_revenue.dart';
@@ -5,6 +7,7 @@ import 'package:driver_finance/features/dashboard/domain/entities/dashboard_summ
 import 'package:driver_finance/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:driver_finance/features/expenses/presentation/pages/expense_form_page.dart';
 import 'package:driver_finance/features/fuel/presentation/pages/fuel_form_page.dart';
+import 'package:driver_finance/features/maintenance/domain/entities/maintenance_record.dart';
 import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_form_page.dart';
 import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_list_page.dart';
 import 'package:driver_finance/features/maintenance/presentation/providers/maintenance_provider.dart';
@@ -54,6 +57,29 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Widget build(BuildContext context) {
     final range = _period.range;
     final summary = ref.watch(dashboardSummaryProvider(range));
+
+    ref.listen<AsyncValue<List<MaintenanceRecord>>>(
+      watchMaintenanceProvider,
+      (prev, next) {
+        if (prev == null) return;
+        final records = next.valueOrNull;
+        if (records != null) {
+          MaintenanceAlertScheduler.rescheduleAll(records);
+        }
+      },
+    );
+
+    ref.listen<DashboardSummary?>(
+      dashboardSummaryProvider(range),
+      (prev, next) {
+        if (prev == null) return;
+        final wasNotMet = (prev.goalProgress ?? 0) < 1.0;
+        final isNowMet = (next?.goalProgress ?? 0) >= 1.0;
+        if (wasNotMet && isNowMet) {
+          GoalNotificationService.notifyGoalReached();
+        }
+      },
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),

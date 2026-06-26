@@ -6,9 +6,12 @@ import 'package:driver_finance/features/auth/presentation/pages/onboarding_page.
 import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:driver_finance/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:driver_finance/features/expenses/presentation/pages/expense_list_page.dart';
+import 'package:driver_finance/features/fuel/presentation/pages/fuel_form_page.dart';
+import 'package:driver_finance/features/mileage/presentation/pages/mileage_form_page.dart';
 import 'package:driver_finance/features/platform/presentation/pages/platform_selection_page.dart';
 import 'package:driver_finance/features/reports/presentation/pages/reports_page.dart';
 import 'package:driver_finance/features/settings/presentation/pages/settings_page.dart';
+import 'package:driver_finance/features/trips/presentation/pages/trip_form_page.dart';
 import 'package:driver_finance/features/trips/presentation/pages/trip_list_page.dart';
 import 'package:driver_finance/features/vehicle/presentation/pages/vehicle_form_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,6 +54,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/platforms',
         builder: (context, state) => const PlatformSelectionPage(),
+      ),
+      GoRoute(
+        path: '/trips/new',
+        builder: (context, state) => const TripFormPage(),
+      ),
+      GoRoute(
+        path: '/fuel/new',
+        builder: (context, state) => const FuelFormPage(),
+      ),
+      GoRoute(
+        path: '/mileage/new',
+        builder: (context, state) => const MileageFormPage(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),

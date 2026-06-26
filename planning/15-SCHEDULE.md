@@ -1,6 +1,6 @@
 # Cronograma por Sprints — Driver Finance AI
 
-_Atualizado em 2026-06-26 | Sprint 8 completo_
+_Atualizado em 2026-06-26 | Sprint 12 completo_
 
 ---
 
@@ -129,26 +129,49 @@ _Atualizado em 2026-06-26 | Sprint 8 completo_
 
 ---
 
-## 🔄 Sprint 10 — Quick Wins (em andamento)
+## ✅ Sprint 10 — Quick Wins
 
-**Objetivo:** Despesas recorrentes, ROI do veículo, Apple Sign-In.
+**Status:** COMPLETO (PR #17 mergeado)
 
-| Feature | MoSCoW | Pts |
-|---------|--------|-----|
-| E4-US06: Despesas recorrentes UI (IPVA, seguro) | S | 3 |
-| E7-US10: ROI do veículo no VehicleFormPage | C | 3 |
-| E1-US02: Apple Sign-In (iOS) | S | 3 |
+| Feature | Status |
+|---------|--------|
+| E4-US06: Despesas recorrentes UI (IPVA, seguro) | ✅ |
+| E7-US10: ROI do veículo no VehicleFormPage | ✅ |
+| E1-US02: Apple Sign-In (iOS) | ✅ |
 
 ---
 
-## Backlog Pós-Sprint 10 (Should/Could Have)
+## ✅ Sprint 11 — Dados e Exportação
+
+**Status:** COMPLETO (PR #18 mergeado)
+
+| Feature | Status |
+|---------|--------|
+| E8-US03: Histórico de conversas IA (persistência + listagem) | ✅ |
+| E10-US04: Export CSV de corridas e despesas | ✅ |
+
+---
+
+## ✅ Sprint 12 — Ganho por Hora
+
+**Status:** COMPLETO (PR #19 mergeado)
+
+| Feature | Status |
+|---------|--------|
+| E7-US04: Schema migration `duration_minutes` (Drift + Supabase) | ✅ |
+| E7-US04: Campo "Duração (min)" no formulário de corrida | ✅ |
+| E7-US04: Card R$/hora nos Relatórios (condicional) | ✅ |
+
+---
+
+## ⏳ Sprint 13 — Push Notifications (requer Firebase pelo usuário)
+
+**Pré-requisito:** Firebase project + `google-services.json` + `GoogleService-Info.plist`
 
 | Feature | MoSCoW | Pts |
 |---------|--------|-----|
-| E9-US03: Push notification ao atingir meta | S | 3 |
-| E7-US04: Ganho por hora | S | 3 |
-| E10-US04: Export CSV | C | 4 |
-| E8-US03: Histórico de conversas IA | C | 3 |
+| E9-US03: Push notification ao atingir meta mensal | S | 3 |
+| E6-US03: Notificação local de manutenção ≤7 dias | S | 3 |
 
 ---
 
@@ -166,7 +189,10 @@ _Atualizado em 2026-06-26 | Sprint 8 completo_
 | Sprint 7 completo | 2026-06-26 | ✅ |
 | Sprint 8 completo | 2026-06-26 | ✅ |
 | Sprint 9 completo | 2026-06-26 | ✅ |
-| Sprint 10 completo | A definir | 🔄 |
+| Sprint 10 completo | 2026-06-26 | ✅ |
+| Sprint 11 completo | 2026-06-26 | ✅ |
+| Sprint 12 completo | 2026-06-26 | ✅ |
+| Sprint 13 completo | A definir (aguarda Firebase) | ⏳ |
 | **v1.0** | A definir | 🔄 |
 
 ---

@@ -31,11 +31,11 @@ class AiChatState {
 
 class AiChatNotifier extends FamilyNotifier<AiChatState, String?> {
   @override
-  AiChatState build(String? conversationId) {
-    if (conversationId != null) {
-      Future.microtask(() => _loadMessages(conversationId));
+  AiChatState build(String? arg) {
+    if (arg != null) {
+      Future.microtask(() => _loadMessages(arg));
     }
-    return AiChatState(conversationId: conversationId);
+    return AiChatState(conversationId: arg);
   }
 
   Future<void> _loadMessages(String conversationId) async {

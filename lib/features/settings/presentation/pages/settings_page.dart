@@ -1,35 +1,144 @@
+import 'package:driver_finance/core/ui/theme/app_colors.dart';
+import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
+import 'package:driver_finance/features/vehicle/presentation/pages/vehicle_form_page.dart';
+import 'package:driver_finance/features/vehicle/presentation/providers/vehicle_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authRepositoryProvider).currentUser;
+    final vehicleAsync = ref.watch(watchVehicleProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
       body: ListView(
-        children: const [
-          ListTile(
-            leading: Icon(Icons.directions_car),
-            title: Text('Veículo'),
-            trailing: Icon(Icons.chevron_right),
+        children: [
+          if (user != null) ...[
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Conta'),
+              subtitle: Text(user.email),
+            ),
+            const Divider(),
+          ],
+          vehicleAsync.when(
+            loading: () => const ListTile(
+              leading: Icon(Icons.directions_car),
+              title: Text('Veículo'),
+              trailing: CircularProgressIndicator(),
+            ),
+            error: (_, __) => const SizedBox(),
+            data: (vehicle) => ListTile(
+              leading: const Icon(Icons.directions_car),
+              title: const Text('Veículo'),
+              subtitle: vehicle != null
+                  ? Text('${vehicle.make} ${vehicle.model}')
+                  : const Text('Nenhum cadastrado'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<bool>(
+                  builder: (_) =>
+                      VehicleFormPage(existingVehicle: vehicle),
+                ),
+              ),
+            ),
           ),
           ListTile(
-            leading: Icon(Icons.apps),
-            title: Text('Plataformas'),
-            trailing: Icon(Icons.chevron_right),
+            leading: const Icon(Icons.apps),
+            title: const Text('Plataformas'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.go('/platforms'),
           ),
           ListTile(
-            leading: Icon(Icons.flag),
-            title: Text('Metas'),
-            trailing: Icon(Icons.chevron_right),
+            leading: const Icon(Icons.flag_outlined),
+            title: const Text('Metas'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Sair'),
+            onTap: () => _confirmSignOut(context, ref),
           ),
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Sair'),
+            leading: const Icon(Icons.delete_forever, color: AppColors.expense),
+            title: const Text(
+              'Excluir conta',
+              style: TextStyle(color: AppColors.expense),
+            ),
+            onTap: () => _confirmDeleteAccount(context, ref),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Sair'),
+        content: const Text('Deseja encerrar sua sessão?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(authNotifierProvider.notifier).signOut();
+      if (!context.mounted) return;
+      context.go('/login');
+    }
+  }
+
+  Future<void> _confirmDeleteAccount(
+      BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Excluir conta'),
+        content: const Text(
+          'Todos os seus dados serão apagados permanentemente. '
+          'Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.expense),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final result =
+          await ref.read(authNotifierProvider.notifier).deleteAccount();
+      if (!context.mounted) return;
+      result.fold(
+        (failure) => ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(failure.message)),
+        ),
+        (_) => context.go('/login'),
+      );
+    }
   }
 }

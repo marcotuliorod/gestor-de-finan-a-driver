@@ -1,8 +1,10 @@
 import 'package:driver_finance/app.dart';
 import 'package:driver_finance/core/network/supabase_client.dart';
+import 'package:driver_finance/core/providers/shared_preferences_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,11 +21,20 @@ Future<void> main() async {
     );
   }
 
+  final prefs = await SharedPreferences.getInstance();
+
   await SentryFlutter.init(
     (options) {
       options.dsn = sentryDsn;
       options.tracesSampleRate = 0.2;
     },
-    appRunner: () => runApp(const ProviderScope(child: DriverFinanceApp())),
+    appRunner: () => runApp(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+        child: const DriverFinanceApp(),
+      ),
+    ),
   );
 }

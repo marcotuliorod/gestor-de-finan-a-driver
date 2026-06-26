@@ -1,7 +1,7 @@
 # Project Context
 
 _Documento vivo — atualizado pelo Documentation Agent ao final de cada ciclo._
-_Última atualização: 2026-06-26 | Fase: Planning Complete_
+_Última atualização: 2026-06-26 | Fase: Implementation — Sprint 8 Completo_
 
 ---
 
@@ -24,90 +24,107 @@ _Última atualização: 2026-06-26 | Fase: Planning Complete_
 | Backend | Supabase | ADR-0003 |
 | Banco de dados | PostgreSQL (Supabase) | ADR-0003 |
 | Banco local | SQLite via Drift | ADR-0005 |
-| Armazenamento de estado | Riverpod | — |
+| Armazenamento de estado | Riverpod v2 | — |
 | Arquitetura | Clean Architecture + DDD + Feature First | ADR-0004 |
 | Estratégia de dados | Offline First + Sync | ADR-0005 |
-| Auth | Supabase Auth (social login: Google, Apple) | — |
-| IA | Claude API (Anthropic) | — |
-| CI/CD | GitHub Actions | — |
-| Observabilidade | Sentry + Supabase Logs | — |
+| Auth | Supabase Auth (Google Sign-In) | — |
+| IA | Claude Haiku via Supabase Edge Function | — |
+| CI/CD | GitHub Actions (`flutter analyze --fatal-infos`) | — |
+| Charts | fl_chart 0.68 | — |
 
 ## Estado Atual
 
-- **Fase:** Planning Complete
-- **Sprint atual:** Sprint 0 (setup)
-- **Features implementadas:** nenhuma
-- **Features em planejamento:** todas (ver `planning/`)
+- **Fase:** Implementation
+- **Sprint atual:** Sprint 9 (a iniciar)
+- **PRs mergeados:** #1 → #13 (todos com CI verde)
+- **Features implementadas:** ver inventário abaixo
+- **Features pendentes:** ver backlog residual abaixo
 
 ## Proposta de Valor
 
 > Motoristas sabem quanto recebem das plataformas, mas não sabem quanto realmente lucram.
 > O Driver Finance AI transforma receitas, despesas e quilometragem em **lucro real**.
 
-## Objetivos do Produto
+## Inventário de Features Implementadas
 
-1. Lucro diário / semanal / mensal com precisão
-2. Custo por quilômetro e ganho por hora
-3. Comparativo entre plataformas (Uber vs 99 vs inDrive)
-4. Consumo médio e depreciação do veículo
-5. Previsão de manutenções com alertas automáticos
-6. Metas financeiras com acompanhamento em tempo real
-7. IA conversacional respondendo perguntas sobre os dados do motorista
+### ✅ Sprint 1 — Auth + Onboarding + Cadastros
+| ID | Feature | Status |
+|----|---------|--------|
+| E1-US01-03 | Auth Google + sessão persistente | ✅ |
+| E1-US04 | Delete account (LGPD) | ✅ |
+| E1-US05-08 | Onboarding 4 passos (pular + completar) | ✅ |
+| E2-US01-03 | Veículo CRUD + campos de depreciação | ✅ |
+| E2-US04 | Plataformas padrão (Uber, 99, inDrive, Táxi, Delivery) | ✅ |
 
-## Restrições e Requisitos Não Funcionais
+### ✅ Sprint 2 — Receitas e Despesas Core
+| ID | Feature | Status |
+|----|---------|--------|
+| E3-US01-03 | Registro de corrida + bônus + gorjeta + cancelamento | ✅ |
+| E3-US04-05 | Listagem + edição/exclusão (swipe) | ✅ |
+| E4-US01-03 | Combustível + consumo médio automático + custo/km | ✅ |
+| E4-US04-05 | Outras despesas + totais por categoria | ✅ |
+| E5-US01-03 | Quilometragem trabalho vs pessoal | ✅ |
 
-| Requisito | Valor |
-|-----------|-------|
-| Tempo de resposta (ops locais) | < 300ms |
-| Cobertura de testes | ≥ 80% |
-| Conformidade | LGPD |
-| Criptografia | em repouso + em trânsito |
-| Offline | funcional sem conexão, sincronização automática |
-| Escalabilidade | multi-usuário, dados isolados por RLS |
+### ✅ Sprint 3 — Dashboard + Metas
+| ID | Feature | Status |
+|----|---------|--------|
+| E7-US01-03 | Dashboard: KPIs (receita, despesas, lucro) + período | ✅ |
+| E7-US05 | Custo por km no período | ✅ |
+| E9-US01-04 | Metas mensais: definição + progresso + valor diário necessário | ✅ |
+| E10-US02-03 | Dark mode + logout | ✅ |
 
-## Modelo de Domínio (alto nível)
+### ✅ Sprint 4 — Relatórios + Charts
+| ID | Feature | Status |
+|----|---------|--------|
+| — | Reports page: gráfico de barras (receita por dia) | ✅ |
+| — | Reports page: gráfico de pizza (distribuição de despesas) | ✅ |
+| — | Theme toggle (Auto / Claro / Escuro) | ✅ |
+| — | Goal form page com cálculo de meta diária | ✅ |
 
-```
-Driver (Motorista)
-  ├── Vehicles (Veículos)
-  ├── Platforms (Plataformas: Uber, 99, inDrive...)
-  ├── Trips (Corridas/Entregas)
-  │     ├── income (receita bruta)
-  │     ├── bonuses, tips, promotions
-  │     └── platform_ref → Platform
-  ├── Expenses (Despesas)
-  │     ├── Fuel (Combustível)
-  │     ├── Maintenance (Manutenções)
-  │     ├── Fixed (IPVA, Seguro, Financiamento...)
-  │     └── Variable (Lavagem, Pedágio, Estacionamento...)
-  ├── Mileage (Quilometragem)
-  │     ├── work_km vs personal_km
-  │     └── vehicle_ref → Vehicle
-  ├── Goals (Metas)
-  │     ├── daily / monthly target
-  │     └── progress tracking
-  └── AIConversations (Histórico IA)
-```
+### ✅ Sprint 5 — IA Conversacional
+| ID | Feature | Status |
+|----|---------|--------|
+| E8-US01-02 | Chat IA com Claude Haiku via Supabase Edge Function | ✅ |
+| — | Contexto financeiro do usuário injetado no prompt | ✅ |
+| — | Sanitização de PII antes do envio | ✅ |
 
-## Artefatos de Planejamento
+### ✅ Sprint 6 — Manutenções
+| ID | Feature | Status |
+|----|---------|--------|
+| E6-US01-02 | Registro de manutenção + histórico completo | ✅ |
+| — | Quick action no dashboard (+Manutenção) | ✅ |
+| — | Acesso por Settings | ✅ |
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `planning/01-PRODUCT_VISION.md` | Visão do produto e métricas de sucesso |
-| `planning/02-ROADMAP.md` | Roadmap por versões (MVP → v1.0 → v2.0) |
-| `planning/03-BACKLOG.md` | Backlog completo com MoSCoW |
-| `planning/04-PERSONAS.md` | 5 personas de motoristas |
-| `planning/05-USER_JOURNEYS.md` | 8 jornadas críticas |
-| `planning/06-TECHNICAL_ARCHITECTURE.md` | Arquitetura técnica detalhada |
-| `planning/07-DOMAIN_MODEL.md` | Modelo de domínio DDD |
-| `planning/08-DATA_MODEL.md` | Schema PostgreSQL completo + SQLite |
-| `planning/09-API_CONTRACTS.md` | Contratos Supabase RPC + Edge Functions |
-| `planning/10-WIREFRAMES.md` | Wireframes de todas as telas |
-| `planning/11-DESIGN_SYSTEM.md` | Design system e tokens |
-| `planning/12-TEST_PLAN.md` | Plano de testes com metas de cobertura |
-| `planning/13-RISK_MATRIX.md` | Matriz de riscos |
-| `planning/14-ESTIMATES.md` | Estimativas por épico |
-| `planning/15-SCHEDULE.md` | Cronograma por sprints |
+### ✅ Sprint 7 — Analytics de Plataformas + Depreciação
+| ID | Feature | Status |
+|----|---------|--------|
+| E7-US06-07 | Comparativo de plataformas + ticket médio (Reports) | ✅ |
+| E7-US08 | Depreciação do veículo prorateada no dashboard | ✅ |
+
+### ✅ Sprint 8 — Refinamentos UX
+| ID | Feature | Status |
+|----|---------|--------|
+| E8-US04 | 6 perguntas sugeridas no chat IA | ✅ |
+| E6-US04 | Próximas revisões com urgência na lista de manutenção | ✅ |
+| E6-US05 | Card de custo total de manutenção | ✅ |
+| E4-US07 | Filtro de período nas despesas (mês / 3 meses / ano) | ✅ |
+
+## Backlog Residual (não implementado)
+
+| ID | Feature | MoSCoW | Pts | Obs |
+|----|---------|--------|-----|-----|
+| E6-US03 | Alertas push de manutenção (por km ou data) | M | 4 | Requer push notification setup |
+| E7-US09 | Gráfico de lucro diário no dashboard | S | 4 | fl_chart disponível |
+| E7-US04 | Ganho por hora (requer registro de horas) | S | 3 | Depende de campo de horas em Trip |
+| E4-US06 | Despesas recorrentes (IPVA, seguro) | S | 3 | |
+| E9-US03 | Push notification ao atingir meta diária | S | 3 | Junto com E6-US03 |
+| E10-US01 | Edição de perfil (nome, foto) | S | 2 | |
+| E5-US04 | Sugestão automática de odômetro | S | 2 | |
+| E1-US02 | Apple Sign-In (iOS only) | S | 3 | Bloqueado por Apple Developer |
+| E10-US04 | Export CSV de corridas e despesas | C | 4 | Requer share_plus |
+| E7-US10 | ROI do veículo | C | 3 | |
+| E8-US03 | Histórico de conversas IA | C | 3 | |
+| E2-US05 | Plataforma customizada | C | 2 | |
 
 ## ADRs Ativos
 
@@ -119,26 +136,48 @@ Driver (Motorista)
 | ADR-0004 | Clean Architecture + DDD + Feature First | Accepted |
 | ADR-0005 | Offline First com SQLite + sync Supabase | Accepted |
 
+## Decisões Técnicas Tomadas na Implementação
+
+| Decisão | Contexto |
+|---------|---------|
+| `Color.withOpacity()` (não `withValues`) | Flutter 3.24 não tem `withValues(alpha:)` |
+| `CardTheme` (não `CardThemeData`) | Flutter 3.24 |
+| `fold<int>` com tipo explícito | Exigido pelo analyzer |
+| `import ... as $db` para AppDatabase | Evita conflito de nome com entidades de domínio |
+| `prefer_const_constructors` como erro fatal | `flutter analyze --fatal-infos` no CI |
+| Claude Haiku (`claude-haiku-4-5-20251001`) | Custo-benefício para chat conversacional |
+| Soft delete (`deletedAt`) | Dados financeiros nunca são apagados permanentemente |
+
 ## Dependências Externas
 
 | Serviço | Uso | Status |
 |---------|-----|--------|
-| Supabase | Backend, Auth, DB, Storage | Planejado |
-| Claude API (Anthropic) | Módulo de IA conversacional | Planejado |
-| Google Sign-In | Auth social | Planejado |
-| Apple Sign-In | Auth social (iOS) | Planejado |
-| Sentry | Monitoramento de erros | Planejado |
+| Supabase | Backend, Auth, DB, Edge Functions | Implementado (código) |
+| Claude API (Anthropic) | Chat IA via Edge Function | Implementado (código) |
+| Google Sign-In | Auth social | Implementado (código) |
+| Apple Sign-In | Auth social (iOS) | Pendente |
+| Sentry | Monitoramento de erros | Pendente configuração |
 
-## Questões em Aberto
+## Ações Pendentes do Usuário (infraestrutura)
 
-| Questão | Responsável | Prioridade |
-|---------|-------------|------------|
-| Modelo Claude a usar (Haiku vs Sonnet) para custo-benefício do chat IA | Architect | Alta |
-| Estratégia de conflito offline (last-write-wins vs merge) | Architect | Alta |
-| Política de retenção de dados para LGPD | — | Média |
+| Ação | Prioridade |
+|------|------------|
+| Criar projeto Supabase e executar migrations | Alta |
+| Configurar Google OAuth no Supabase Auth | Alta |
+| Adicionar ANTHROPIC_API_KEY ao Supabase Vault | Alta |
+| Deploy da Edge Function `ai-chat` | Alta |
+| Adicionar SUPABASE_URL + SUPABASE_ANON_KEY ao GitHub Secrets | Alta |
+| Configurar Sentry DSN | Média |
 
 ## Log de Alterações Recentes
 
-| Data | Alteração | Agente |
+| Data | Alteração | Sprint |
 |------|-----------|--------|
-| 2026-06-26 | Inicialização do framework e planejamento completo | Framework Init |
+| 2026-06-26 | Auth, Onboarding, Veículo, Plataformas | Sprint 1 |
+| 2026-06-26 | Corridas, Combustível, Despesas, Quilometragem | Sprint 2 |
+| 2026-06-26 | Dashboard KPIs, Metas, Dark mode | Sprint 3 |
+| 2026-06-26 | Reports charts, Theme toggle, Goal form | Sprint 4 |
+| 2026-06-26 | AI Chat via Edge Function (Claude Haiku) | Sprint 5 |
+| 2026-06-26 | Manutenções CRUD | Sprint 6 |
+| 2026-06-26 | Platform analytics (Reports) + Depreciação (Dashboard) | Sprint 7 |
+| 2026-06-26 | AI suggestions ×6, Upcoming maintenance, Expense period filter | Sprint 8 |

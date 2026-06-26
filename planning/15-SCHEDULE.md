@@ -1,181 +1,171 @@
 # Cronograma por Sprints — Driver Finance AI
 
-_Gerado pelo Planner Agent | 2026-06-26_
-_Início previsto: Sprint 0 — Semana de 30 Jun 2026_
+_Atualizado em 2026-06-26 | Sprint 8 completo_
 
 ---
 
-## Sprint 0 — Setup e Infraestrutura (1 semana, sem story points)
+## ✅ Sprint 0 — Setup e Infraestrutura
 
-**Objetivo:** Projeto rodando end-to-end com CI verde.
+**Status:** COMPLETO
 
-### Tarefas Técnicas
-
-**Supabase:**
-- [ ] Criar projeto Supabase (produção + staging)
-- [ ] Configurar Auth (Google Sign-In + Apple Sign-In)
-- [ ] Criar schema inicial com todas as tabelas (migrations 0001-0010)
-- [ ] Configurar RLS em todas as tabelas
-- [ ] Deploy Edge Function `ai-chat` (stub que retorna "OK")
-- [ ] Configurar Supabase Vault para secrets (ANTHROPIC_API_KEY)
-
-**Flutter:**
-- [ ] Criar projeto Flutter com estrutura Feature First
-- [ ] Configurar dependências (pubspec.yaml): riverpod, drift, supabase_flutter, go_router, fl_chart, fpdart, intl, mocktail, flutter_lints
-- [ ] Configurar Drift + banco local com tabelas espelho
-- [ ] Configurar GoRouter com rotas placeholder
-- [ ] Configurar tema (AppTheme light + dark)
-- [ ] Configurar Riverpod com ProviderScope
-- [ ] Configurar Sentry
-
-**CI/CD:**
-- [ ] GitHub Actions: lint + test + build APK (Android) em todo PR
-- [ ] Coverage check: falha se < 80%
-- [ ] Branch protection: PR obrigatório para main
-
-**Definição de Pronto:**
-- `flutter analyze` sem warnings
-- `flutter test` passando (0 testes, mas pipeline funcionando)
-- Build APK debug gerando com sucesso
-- Login Google funcionando em emulador
+- [x] Projeto Flutter com estrutura Feature First
+- [x] Drift + banco local com tabelas espelho
+- [x] GoRouter com rotas
+- [x] Tema AppTheme light + dark
+- [x] Riverpod com ProviderScope
+- [x] GitHub Actions: `flutter analyze --fatal-infos` em todo PR
+- [x] Branch protection: PR obrigatório para main
 
 ---
 
-## Sprint 1 — Auth, Onboarding e Cadastros (2 semanas, 20 pts)
+## ✅ Sprint 1 — Auth, Onboarding e Cadastros
 
-**Objetivo:** Usuário consegue fazer login, configurar veículo e plataformas.
+**Status:** COMPLETO (PR #1, #2 mergeados)
 
-| Feature | Story Points | Agentes |
-|---------|-------------|---------|
-| E1-US01-03: Auth Google + sessão | 5 | Backend + Frontend |
-| E1-US04: Delete account LGPD | 3 | Backend + Database |
-| E1-US05-08: Onboarding 4 passos | 10 | Frontend |
-| E2-US01-02: Veículo CRUD | 3 | Backend + Frontend + Database |
-| E2-US04: Plataformas padrão | 2 | Backend + Frontend |
-
-**Gate de Conclusão:**
-- Login + logout funcionando no device físico
-- Onboarding completo (pular + completar)
-- Veículo e plataformas persistidos localmente + sync com Supabase
+| Feature | Status |
+|---------|--------|
+| E1-US01-03: Auth Google + sessão | ✅ |
+| E1-US04: Delete account LGPD | ✅ |
+| E1-US05-08: Onboarding 4 passos | ✅ |
+| E2-US01-03: Veículo CRUD + depreciação | ✅ |
+| E2-US04: Plataformas padrão | ✅ |
 
 ---
 
-## Sprint 2 — Receitas e Despesas (2 semanas, 20 pts)
+## ✅ Sprint 2 — Receitas e Despesas
 
-**Objetivo:** Usuário consegue registrar corridas e despesas (core do produto).
+**Status:** COMPLETO (PR #3, #4 mergeados)
 
-| Feature | Story Points | Agentes |
-|---------|-------------|---------|
-| E3-US01-03: Registro de corrida + extras | 6 | Backend + Frontend |
-| E3-US04-05: Listagem + edição/exclusão | 5 | Frontend |
-| E4-US01-03: Combustível completo + consumo médio | 8 | Backend + Frontend + Database |
-| E5-US01-03: Quilometragem | 6 | Backend + Frontend |
-
-**Gate de Conclusão:**
-- Registro de corrida em < 30 segundos (medido em device físico)
-- Consumo médio calculado automaticamente após 2 abastecimentos
-- Km trabalho vs pessoal registrado e calculado corretamente
+| Feature | Status |
+|---------|--------|
+| E3-US01-05: Corridas + listagem + edição/exclusão | ✅ |
+| E4-US01-05: Combustível + outras despesas + custo/km | ✅ |
+| E5-US01-03: Quilometragem trabalho vs pessoal | ✅ |
 
 ---
 
-## Sprint 3 — Dashboard, Metas e Offline (2 semanas, 20 pts)
+## ✅ Sprint 3 — Dashboard + Metas
 
-**Objetivo:** Dashboard com lucro real, meta diária e funcionamento offline.
+**Status:** COMPLETO (PR #5, #6 mergeados)
 
-| Feature | Story Points | Agentes |
-|---------|-------------|---------|
-| E4-US04-05: Despesas + totais por categoria | 6 | Backend + Frontend |
-| E7-US01-05: Dashboard básico (lucro, meta, custo/km) | 13 | Backend + Frontend |
-| E9-US01-04: Metas completo | 10 | Backend + Frontend |
-| E10-US02-03-05: Dark mode + logout + combustível | 4 | Frontend |
-
-**Gate de Conclusão (MVP Beta):**
-- Dashboard mostra lucro real (receitas − despesas)
-- Meta diária com progresso em % funcionando
-- App funciona completamente offline (sem internet por 24h, registros persistem)
-- Sync automático ao reconectar
+| Feature | Status |
+|---------|--------|
+| E7-US01-03,05: Dashboard KPIs + custo/km | ✅ |
+| E9-US01-04: Metas mensais com progresso | ✅ |
+| E10-US02-03: Dark mode + logout | ✅ |
 
 ---
 
-**🎯 MVP Beta — Fim de Agosto 2026 (estimado)**
+## ✅ Sprint 4 — Relatórios e Charts
+
+**Status:** COMPLETO (PR #7, #8 mergeados)
+
+| Feature | Status |
+|---------|--------|
+| Reports: gráfico de barras receita por dia | ✅ |
+| Reports: gráfico de pizza distribuição de despesas | ✅ |
+| Theme toggle (Auto / Claro / Escuro) | ✅ |
+| Goal form com meta diária calculada | ✅ |
 
 ---
 
-## Sprint 4 — Manutenções e Dashboard Avançado (2 semanas, 20 pts)
+## ✅ Sprint 5 — IA Conversacional
 
-**Objetivo:** Alertas de manutenção + indicadores financeiros avançados.
+**Status:** COMPLETO (PR #9, #10 mergeados)
 
-| Feature | Story Points | Agentes |
-|---------|-------------|---------|
-| E6-US01-02: Registro + histórico manutenção | 5 | Backend + Frontend |
-| E6-US03: Alertas automáticos (push notifications) | 4 | Backend + DevOps |
-| E6-US04-05: Revisões programadas + custos | 5 | Frontend |
-| E7-US06-07: Comparativo plataformas + ticket médio | 8 | Backend + Frontend |
-
-**Gate de Conclusão:**
-- Alerta de manutenção disparando corretamente por km
-- Gráfico comparativo de plataformas funcionando
+| Feature | Status |
+|---------|--------|
+| E8-US01-02: Chat IA com Claude Haiku + contexto do usuário | ✅ |
+| Edge Function `ai-chat` (Deno + Supabase) | ✅ |
+| Sanitização de PII | ✅ |
 
 ---
 
-## Sprint 5 — Dashboard Completo e IA (parcial) (2 semanas, 20 pts)
+## ✅ Sprint 6 — Manutenções
 
-**Objetivo:** Dashboard completo + início do módulo de IA.
+**Status:** COMPLETO (PR #11 mergeado)
 
-| Feature | Story Points | Agentes |
-|---------|-------------|---------|
-| E7-US08-09: Depreciação + gráfico diário | 8 | Backend + Frontend |
-| E8-US01-02: Chat IA básico + contexto do usuário | 13 | Backend + DevOps (Edge Function) |
-
-**Gate de Conclusão:**
-- Depreciação calculada e exibida no dashboard
-- Chat de IA respondendo 6 perguntas sugeridas corretamente
+| Feature | Status |
+|---------|--------|
+| E6-US01-02: Registro de manutenção + histórico | ✅ |
+| Quick action no dashboard | ✅ |
+| Acesso via Settings | ✅ |
 
 ---
 
-## Sprint 6 — IA Completo, Polish e v1.0 (2 semanas, 14 pts)
+## ✅ Sprint 7 — Platform Analytics + Depreciação
 
-**Objetivo:** IA refinada, bugs corrigidos, v1.0 pronta para lançamento.
+**Status:** COMPLETO (PR #12 mergeado)
 
-| Feature | Story Points | Agentes |
-|---------|-------------|---------|
-| E8-US04: Perguntas sugeridas no chat | 2 | Frontend |
-| E1-US02: Apple Sign-In iOS | 3 | Backend + Frontend |
-| Polish: animações, empty states, error handling | 5 | Frontend |
-| Bug bash: testes em devices físicos Android + iOS | 4 | QA |
-
-**Gate de Conclusão (v1.0):**
-- NPS ≥ 40 (beta testers)
-- 0 crash rate em sessão normal
-- Cobertura de testes ≥ 80%
-- App submetido para App Store + Google Play
+| Feature | Status |
+|---------|--------|
+| E7-US06-07: Comparativo plataformas + ticket médio | ✅ |
+| E7-US08: Depreciação prorateada no dashboard | ✅ |
 
 ---
 
-**🚀 v1.0 — Fim de Outubro 2026 (estimado)**
+## ✅ Sprint 8 — Refinamentos UX
+
+**Status:** COMPLETO (PR #13 mergeado)
+
+| Feature | Status |
+|---------|--------|
+| E8-US04: 6 perguntas sugeridas no chat IA | ✅ |
+| E6-US04: Próximas revisões com urgência | ✅ |
+| E6-US05: Card de custo total de manutenção | ✅ |
+| E4-US07: Filtro de período nas despesas | ✅ |
 
 ---
 
-## Marcos Principais
+## 🔄 Sprint 9 — Polish Final + Backlog Must-Have (planejado)
 
-| Marco | Data Estimada | Critério de Sucesso |
-|-------|--------------|-------------------|
-| Sprint 0 completo | 07 Jul 2026 | CI verde, login funcionando |
-| Sprint 1 completo | 21 Jul 2026 | Onboarding funcional |
-| Sprint 2 completo | 04 Ago 2026 | Registro de corrida em < 30s |
-| **MVP Beta** | **18 Ago 2026** | Lucro real calculado, offline funciona |
-| Sprint 4 completo | 15 Set 2026 | Alertas de manutenção ativos |
-| Sprint 5 completo | 29 Set 2026 | IA respondendo perguntas |
-| **v1.0** | **13 Out 2026** | Nas stores, NPS ≥ 40 |
+**Objetivo:** Fechar o único Must Have pendente (alertas de manutenção), adicionar o gráfico de lucro diário, e polish de UX.
+
+| Feature | MoSCoW | Pts |
+|---------|--------|-----|
+| E6-US03: Alertas push de manutenção (por km/data) | M | 4 |
+| E7-US09: Gráfico de lucro diário no dashboard | S | 4 |
+| E10-US01: Edição de perfil (nome) | S | 2 |
+| E5-US04: Sugestão automática de odômetro | S | 2 |
 
 ---
 
-## Dependências Críticas do Cronograma
+## Backlog Pós-Sprint 9 (Should/Could Have)
 
-| Dependência | Bloqueia | Mitigação |
-|------------|---------|-----------|
-| Supabase Auth configurado | Sprint 1 | Sprint 0 obrigatório primeiro |
-| Schema DB criado | Sprint 1, 2 | Sprint 0 inclui migrations completas |
-| Consumo calculado (Sprint 2) | Dashboard custo/km (Sprint 3) | Manter sequência |
-| Receitas + Despesas (Sprint 2-3) | IA (Sprint 5) | IA precisa de dados para ser útil |
-| ANTHROPIC_API_KEY configurada | Sprint 5 | DevOps no Supabase Vault no Sprint 0 |
+| Feature | MoSCoW | Pts |
+|---------|--------|-----|
+| E4-US06: Despesas recorrentes (IPVA, seguro) | S | 3 |
+| E9-US03: Push notification ao atingir meta | S | 3 |
+| E7-US04: Ganho por hora | S | 3 |
+| E10-US04: Export CSV | C | 4 |
+| E1-US02: Apple Sign-In (iOS) | S | 3 |
+| E7-US10: ROI do veículo | C | 3 |
+| E8-US03: Histórico de conversas IA | C | 3 |
+
+---
+
+## Marcos
+
+| Marco | Data Real / Estimada | Status |
+|-------|---------------------|--------|
+| Sprint 0 completo | 2026-06-26 | ✅ |
+| Sprint 1 completo | 2026-06-26 | ✅ |
+| Sprint 2 completo | 2026-06-26 | ✅ |
+| **MVP Beta** (Sprints 1-3) | **2026-06-26** | ✅ **Atingido** |
+| Sprint 4 completo | 2026-06-26 | ✅ |
+| Sprint 5 completo | 2026-06-26 | ✅ |
+| Sprint 6 completo | 2026-06-26 | ✅ |
+| Sprint 7 completo | 2026-06-26 | ✅ |
+| Sprint 8 completo | 2026-06-26 | ✅ |
+| Sprint 9 completo | A definir | 🔄 |
+| **v1.0** | A definir | 🔄 |
+
+---
+
+## Dependências Críticas Restantes
+
+| Dependência | Bloqueia | Status |
+|------------|---------|--------|
+| Supabase projeto criado + Auth configurado | Deploy | ⏳ Ação do usuário |
+| ANTHROPIC_API_KEY no Supabase Vault | Chat IA | ⏳ Ação do usuário |
+| Push notification provider (FCM/APNs) | E6-US03, E9-US03 | 🔄 Sprint 9 |

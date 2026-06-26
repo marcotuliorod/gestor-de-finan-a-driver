@@ -42,6 +42,10 @@ dependencies:
   # Local preferences (onboarding state, theme)
   shared_preferences: ^2.3.0
 
+  # CSV export + share
+  csv: ^6.0.0
+  share_plus: ^10.0.0
+
   # Observability
   sentry_flutter: ^8.1.0
 

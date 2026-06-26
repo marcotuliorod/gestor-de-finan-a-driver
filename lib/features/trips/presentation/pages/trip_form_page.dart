@@ -24,6 +24,7 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
   final _tipCtrl = TextEditingController();
   final _promotionCtrl = TextEditingController();
   final _cancellationCtrl = TextEditingController();
+  final _durationCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
 
   String? _selectedPlatformId;
@@ -46,6 +47,9 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
           .toStringAsFixed(2)
           .replaceAll('.', ',');
       _notesCtrl.text = t.notes ?? '';
+      if (t.durationMinutes != null) {
+        _durationCtrl.text = t.durationMinutes.toString();
+      }
       _selectedPlatformId = t.platformId;
       _tripDate = t.tripDate;
     }
@@ -58,6 +62,7 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
     _tipCtrl.dispose();
     _promotionCtrl.dispose();
     _cancellationCtrl.dispose();
+    _durationCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
   }
@@ -142,6 +147,24 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
               ),
               const SizedBox(height: 12),
               TextFormField(
+                controller: _durationCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Duração (min) — opcional',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                validator: (v) {
+                  if (v == null || v.isEmpty) return null;
+                  final val = int.tryParse(v);
+                  if (val == null || val <= 0) return 'Informe um número válido';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
                 controller: _notesCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Observações (opcional)',
@@ -183,6 +206,10 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
     int parseCents(String text) =>
         ((parseCurrencyInput(text) ?? 0) * 100).round();
 
+    final durationText = _durationCtrl.text.trim();
+    final durationMinutes =
+        durationText.isEmpty ? null : int.tryParse(durationText);
+
     final result = await ref
         .read(tripFormNotifierProvider.notifier)
         .save(
@@ -194,6 +221,7 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
           tipAmountCents: parseCents(_tipCtrl.text),
           promotionCents: parseCents(_promotionCtrl.text),
           cancellationCents: parseCents(_cancellationCtrl.text),
+          durationMinutes: durationMinutes,
           tripDate: _tripDate,
           notes: _notesCtrl.text,
         );

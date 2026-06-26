@@ -12,6 +12,7 @@ class ReportsSummary {
     required this.otherExpenseCents,
     required this.tripCount,
     required this.dailyIncomes,
+    required this.totalDurationMinutes,
   });
 
   final int totalIncomeCents;
@@ -19,7 +20,13 @@ class ReportsSummary {
   final int otherExpenseCents;
   final int tripCount;
   final List<DailyIncome> dailyIncomes;
+  final int totalDurationMinutes;
 
   int get totalExpensesCents => fuelExpenseCents + otherExpenseCents;
   int get netProfitCents => totalIncomeCents - totalExpensesCents;
+
+  int? get earningsPerHourCents {
+    if (totalDurationMinutes == 0) return null;
+    return (totalIncomeCents * 60 / totalDurationMinutes).round();
+  }
 }

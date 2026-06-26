@@ -38,6 +38,7 @@ class TripFormNotifier extends AsyncNotifier<void> {
     int tipAmountCents = 0,
     int promotionCents = 0,
     int cancellationCents = 0,
+    int? durationMinutes,
     required DateTime tripDate,
     String? notes,
   }) async {
@@ -52,6 +53,7 @@ class TripFormNotifier extends AsyncNotifier<void> {
       tipAmountCents: tipAmountCents,
       promotionCents: promotionCents,
       cancellationCents: cancellationCents,
+      durationMinutes: durationMinutes,
       tripDate: tripDate,
       notes: notes?.isEmpty == true ? null : notes,
       createdAt: DateTime.now(),

@@ -7,6 +7,8 @@ import 'package:driver_finance/features/auth/presentation/providers/auth_provide
 import 'package:driver_finance/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:driver_finance/features/expenses/presentation/pages/expense_list_page.dart';
 import 'package:driver_finance/features/fuel/presentation/pages/fuel_form_page.dart';
+import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_form_page.dart';
+import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_list_page.dart';
 import 'package:driver_finance/features/mileage/presentation/pages/mileage_form_page.dart';
 import 'package:driver_finance/features/platform/presentation/pages/platform_selection_page.dart';
 import 'package:driver_finance/features/reports/presentation/pages/reports_page.dart';
@@ -66,6 +68,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/mileage/new',
         builder: (context, state) => const MileageFormPage(),
+      ),
+      GoRoute(
+        path: '/maintenance/new',
+        builder: (context, state) => const MaintenanceFormPage(),
+      ),
+      GoRoute(
+        path: '/maintenance',
+        builder: (context, state) => const MaintenanceListPage(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),

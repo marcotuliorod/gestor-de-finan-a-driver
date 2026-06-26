@@ -4,6 +4,7 @@ import 'package:driver_finance/features/dashboard/domain/entities/dashboard_summ
 import 'package:driver_finance/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:driver_finance/features/expenses/presentation/pages/expense_form_page.dart';
 import 'package:driver_finance/features/fuel/presentation/pages/fuel_form_page.dart';
+import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_form_page.dart';
 import 'package:driver_finance/features/trips/presentation/pages/trip_form_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -402,6 +403,18 @@ class _QuickActions extends StatelessWidget {
                 ),
                 icon: const Icon(Icons.local_gas_station_rounded, size: 18),
                 label: const Text('Abastec.'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<bool>(
+                    builder: (_) => const MaintenanceFormPage(),
+                  ),
+                ),
+                icon: const Icon(Icons.build_outlined, size: 18),
+                label: const Text('Manutenção'),
               ),
             ),
           ],

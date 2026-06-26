@@ -3,6 +3,7 @@ import 'package:driver_finance/features/auth/domain/entities/app_user.dart';
 import 'package:driver_finance/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -81,6 +82,39 @@ class AuthRepositoryImpl implements AuthRepository {
       await _googleSignIn.signOut();
       await _supabase.auth.signOut();
       return right(unit);
+    } catch (e) {
+      return left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, AppUser>> signInWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      final idToken = credential.identityToken;
+      if (idToken == null) {
+        return left(const AuthFailure('Token Apple não disponível'));
+      }
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+      );
+      if (response.user == null) {
+        return left(const AuthFailure('Usuário não retornado pelo servidor'));
+      }
+      return right(_toAppUser(response.user!));
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        return left(const AuthFailure('Login cancelado pelo usuário'));
+      }
+      return left(AuthFailure(e.message));
+    } on AuthException catch (e) {
+      return left(AuthFailure(e.message));
     } catch (e) {
       return left(UnexpectedFailure(e.toString()));
     }

@@ -262,7 +262,16 @@ class _ExpenseTile extends StatelessWidget {
           size: 20,
         ),
       ),
-      title: Text(expense.category.label),
+      title: Row(
+        children: [
+          Text(expense.category.label),
+          if (expense.isRecurring) ...[
+            const SizedBox(width: 6),
+            const Icon(Icons.repeat_rounded,
+                size: 14, color: AppColors.textSecondary),
+          ],
+        ],
+      ),
       subtitle: Text(
         '${formatDate(expense.expenseDate)}'
         '${expense.description != null ? ' • ${expense.description}' : ''}',

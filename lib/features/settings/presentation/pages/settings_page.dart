@@ -6,6 +6,7 @@ import 'package:driver_finance/features/goals/presentation/providers/goal_provid
 import 'package:driver_finance/features/settings/presentation/providers/theme_provider.dart';
 import 'package:driver_finance/features/vehicle/presentation/pages/vehicle_form_page.dart';
 import 'package:driver_finance/features/vehicle/presentation/providers/vehicle_provider.dart';
+import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -59,6 +60,16 @@ class SettingsPage extends ConsumerWidget {
             title: const Text('Plataformas'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.go('/platforms'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.build_outlined),
+            title: const Text('Manutenções'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const MaintenanceListPage(),
+              ),
+            ),
           ),
           goalAsync.when(
             loading: () => const ListTile(

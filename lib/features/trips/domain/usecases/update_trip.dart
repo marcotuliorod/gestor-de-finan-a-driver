@@ -8,6 +8,5 @@ class UpdateTripUseCase {
 
   final TripRepository _repository;
 
-  Future<Either<Failure, Trip>> call(Trip trip) =>
-      _repository.updateTrip(trip);
+  Future<Either<Failure, Trip>> call(Trip trip) => _repository.updateTrip(trip);
 }

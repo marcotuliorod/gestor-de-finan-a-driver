@@ -13,7 +13,8 @@ class CreateVehicleUseCase {
       return Future.value(left(const ValidationFailure('Marca é obrigatória')));
     }
     if (vehicle.model.trim().isEmpty) {
-      return Future.value(left(const ValidationFailure('Modelo é obrigatório')));
+      return Future.value(
+          left(const ValidationFailure('Modelo é obrigatório')));
     }
     if (vehicle.year < 1950 || vehicle.year > DateTime.now().year + 1) {
       return Future.value(left(const ValidationFailure('Ano inválido')));

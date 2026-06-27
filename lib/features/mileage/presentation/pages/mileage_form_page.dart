@@ -165,16 +165,15 @@ class _MileageFormPageState extends ConsumerState<MileageFormPage> {
     final personal = int.tryParse(_personalCtrl.text) ?? 0;
     final work = (end - start) - personal;
 
-    final result =
-        await ref.read(mileageFormNotifierProvider.notifier).save(
-              userId: user.id,
-              vehicleId: vehicle.id,
-              startOdometer: start,
-              endOdometer: end,
-              workKm: work,
-              personalKm: personal,
-              recordDate: _recordDate,
-            );
+    final result = await ref.read(mileageFormNotifierProvider.notifier).save(
+          userId: user.id,
+          vehicleId: vehicle.id,
+          startOdometer: start,
+          endOdometer: end,
+          workKm: work,
+          personalKm: personal,
+          recordDate: _recordDate,
+        );
 
     if (!mounted) return;
     result.fold(

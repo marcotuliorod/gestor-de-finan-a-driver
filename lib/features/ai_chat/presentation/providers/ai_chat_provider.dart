@@ -67,7 +67,8 @@ class AiChatNotifier extends FamilyNotifier<AiChatState, String?> {
       final db = ref.read($db.appDatabaseProvider);
       final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
       final now = DateTime.now();
-      final title = trimmed.length > 50 ? '${trimmed.substring(0, 50)}…' : trimmed;
+      final title =
+          trimmed.length > 50 ? '${trimmed.substring(0, 50)}…' : trimmed;
       await db.into(db.aiConversations).insert(
             $db.AiConversationsCompanion(
               id: Value(conversationId),

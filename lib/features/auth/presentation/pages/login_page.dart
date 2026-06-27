@@ -27,7 +27,8 @@ class LoginPage extends ConsumerWidget {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              const Icon(Icons.directions_car_rounded, size: 80, color: AppColors.primary),
+              const Icon(Icons.directions_car_rounded,
+                  size: 80, color: AppColors.primary),
               const SizedBox(height: 24),
               Text(
                 'Driver Finance',
@@ -87,7 +88,8 @@ class LoginPage extends ConsumerWidget {
   }
 
   Future<void> _signIn(BuildContext context, WidgetRef ref) async {
-    final result = await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+    final result =
+        await ref.read(authNotifierProvider.notifier).signInWithGoogle();
     result.fold(
       (failure) {
         if (!context.mounted) return;
@@ -100,7 +102,8 @@ class LoginPage extends ConsumerWidget {
   }
 
   Future<void> _signInWithApple(BuildContext context, WidgetRef ref) async {
-    final result = await ref.read(authNotifierProvider.notifier).signInWithApple();
+    final result =
+        await ref.read(authNotifierProvider.notifier).signInWithApple();
     result.fold(
       (failure) {
         if (!context.mounted) return;

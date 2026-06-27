@@ -34,9 +34,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   void _seedPlatforms() {
     final user = ref.read(authRepositoryProvider).currentUser;
     if (user != null) {
-      ref
-          .read(platformSelectionNotifierProvider.notifier)
-          .seed(user.id);
+      ref.read(platformSelectionNotifierProvider.notifier).seed(user.id);
     }
   }
 
@@ -174,7 +172,8 @@ class _WelcomePage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.directions_car_rounded, size: 80, color: AppColors.primary),
+          const Icon(Icons.directions_car_rounded,
+              size: 80, color: AppColors.primary),
           const SizedBox(height: 24),
           Text(
             'Bem-vindo ao Driver Finance!',
@@ -196,15 +195,15 @@ class _WelcomePage extends StatelessWidget {
                   children: [
                     Icon(f.$1, color: AppColors.primary, size: 22),
                     const SizedBox(width: 12),
-                    Text(f.$2,
-                        style: Theme.of(context).textTheme.bodyMedium),
+                    Text(f.$2, style: Theme.of(context).textTheme.bodyMedium),
                   ],
                 ),
               )),
           const SizedBox(height: 32),
           FilledButton(
             onPressed: onNext,
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            style:
+                FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
             child: const Text('Começar'),
           ),
         ],
@@ -263,7 +262,8 @@ class _VehicleStep extends ConsumerWidget {
           const Spacer(),
           FilledButton(
             onPressed: onNext,
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            style:
+                FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
             child: const Text('Próximo'),
           ),
         ],
@@ -290,7 +290,8 @@ class _VehicleSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: const Icon(Icons.directions_car_rounded, color: AppColors.primary),
+        leading:
+            const Icon(Icons.directions_car_rounded, color: AppColors.primary),
         title: Text('$make $model'),
         subtitle: const Text('Cadastrado ✓'),
         trailing: const Icon(Icons.check_circle, color: AppColors.income),
@@ -347,7 +348,8 @@ class _PlatformStep extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: onNext,
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            style:
+                FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
             child: const Text('Próximo'),
           ),
         ],
@@ -403,8 +405,7 @@ class _GoalStepState extends ConsumerState<_GoalStep> {
               prefixText: 'R\$ ',
               border: OutlineInputBorder(),
             ),
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[\d,.]')),
             ],
@@ -437,7 +438,8 @@ class _GoalStepState extends ConsumerState<_GoalStep> {
           const Spacer(),
           FilledButton(
             onPressed: _saveAndFinish,
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            style:
+                FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
             child: const Text('Começar a usar'),
           ),
           const SizedBox(height: 12),

@@ -112,7 +112,7 @@ class _VehicleFormPageState extends ConsumerState<VehicleFormPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _fuelType,
+              initialValue: _fuelType,
               decoration: const InputDecoration(
                 labelText: 'Combustível',
                 border: OutlineInputBorder(),
@@ -182,8 +182,7 @@ class _VehicleFormPageState extends ConsumerState<VehicleFormPage> {
     final user = ref.read(authRepositoryProvider).currentUser;
     if (user == null) return;
 
-    final priceRaw =
-        _priceCtrl.text.replaceAll('.', '').replaceAll(',', '.');
+    final priceRaw = _priceCtrl.text.replaceAll('.', '').replaceAll(',', '.');
     final priceCents = ((double.parse(priceRaw)) * 100).round();
 
     final result = await ref.read(vehicleFormNotifierProvider.notifier).save(
@@ -194,8 +193,7 @@ class _VehicleFormPageState extends ConsumerState<VehicleFormPage> {
           year: int.parse(_yearCtrl.text),
           licensePlate: _plateCtrl.text.trim().toUpperCase(),
           fuelType: _fuelType,
-          tankCapacityL: double.parse(
-              _tankCtrl.text.replaceAll(',', '.')),
+          tankCapacityL: double.parse(_tankCtrl.text.replaceAll(',', '.')),
           purchasePriceCents: priceCents,
         );
 
@@ -225,12 +223,13 @@ class _RoiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final monthsOwned =
-        ((now.year - vehicle.year) * 12 + now.month).clamp(1, vehicle.usefulLifeMonths);
+    final monthsOwned = ((now.year - vehicle.year) * 12 + now.month)
+        .clamp(1, vehicle.usefulLifeMonths);
     final depreciationAccumulated =
         vehicle.monthlyDepreciationCents * monthsOwned;
     final estimatedValue =
-        (vehicle.purchasePriceCents - depreciationAccumulated).clamp(0, vehicle.purchasePriceCents);
+        (vehicle.purchasePriceCents - depreciationAccumulated)
+            .clamp(0, vehicle.purchasePriceCents);
 
     return Card(
       child: Padding(
@@ -259,7 +258,9 @@ class _RoiCard extends StatelessWidget {
             _RoiRow(
               label: 'Valor atual estimado',
               value: formatCurrency(estimatedValue),
-              color: estimatedValue > 0 ? AppColors.income : AppColors.textSecondary,
+              color: estimatedValue > 0
+                  ? AppColors.income
+                  : AppColors.textSecondary,
               bold: true,
             ),
           ],

@@ -108,7 +108,7 @@ class _FuelFormPageState extends ConsumerState<FuelFormPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _fuelType,
+                initialValue: _fuelType,
                 decoration: const InputDecoration(
                   labelText: 'Tipo de combustível',
                   border: OutlineInputBorder(),
@@ -175,16 +175,15 @@ class _FuelFormPageState extends ConsumerState<FuelFormPage> {
     final liters = parseCurrencyInput(_litersCtrl.text) ?? 0;
     final odometer = int.tryParse(_odometerCtrl.text) ?? 0;
 
-    final result =
-        await ref.read(fuelFormNotifierProvider.notifier).save(
-              userId: user.id,
-              vehicleId: vehicle.id,
-              amountCents: amountCents,
-              liters: liters,
-              odometer: odometer,
-              fuelType: _fuelType,
-              recordDate: _recordDate,
-            );
+    final result = await ref.read(fuelFormNotifierProvider.notifier).save(
+          userId: user.id,
+          vehicleId: vehicle.id,
+          amountCents: amountCents,
+          liters: liters,
+          odometer: odometer,
+          fuelType: _fuelType,
+          recordDate: _recordDate,
+        );
 
     if (!mounted) return;
     result.fold(

@@ -33,9 +33,8 @@ final dashboardSummaryProvider =
   final otherExp = expenses.fold<int>(0, (s, e) => s + e.amountCents);
   final fuelExp = fuels.fold<int>(0, (s, f) => s + f.amountCents);
   final goalCents = goal?.monthlyTargetCents;
-  final goalProgress = (goalCents != null && goalCents > 0)
-      ? income / goalCents
-      : null;
+  final goalProgress =
+      (goalCents != null && goalCents > 0) ? income / goalCents : null;
 
   final daysInMonth = DateTime(period.$1.year, period.$1.month + 1, 0).day;
   final periodDays =
@@ -46,8 +45,8 @@ final dashboardSummaryProvider =
 
   final dayMap = <DateTime, int>{};
   for (final trip in trips) {
-    final day = DateTime(
-        trip.tripDate.year, trip.tripDate.month, trip.tripDate.day);
+    final day =
+        DateTime(trip.tripDate.year, trip.tripDate.month, trip.tripDate.day);
     dayMap[day] = (dayMap[day] ?? 0) + trip.totalIncomeCents;
   }
   final dailyRevenues = dayMap.entries

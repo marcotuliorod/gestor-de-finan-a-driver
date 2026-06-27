@@ -25,8 +25,9 @@ class _GoalFormPageState extends ConsumerState<GoalFormPage> {
     super.initState();
     final goal = widget.existingGoal;
     if (goal != null) {
-      _amountCtrl.text =
-          (goal.monthlyTargetCents / 100).toStringAsFixed(2).replaceAll('.', ',');
+      _amountCtrl.text = (goal.monthlyTargetCents / 100)
+          .toStringAsFixed(2)
+          .replaceAll('.', ',');
       _workingDays = goal.workingDaysPerMonth;
     }
   }

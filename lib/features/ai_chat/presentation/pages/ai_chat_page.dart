@@ -39,10 +39,10 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
   void _send() {
     final text = _textCtrl.text.trim();
     if (text.isEmpty ||
-        ref.read(aiChatProvider(widget.conversationId)).isTyping) return;
-    ref
-        .read(aiChatProvider(widget.conversationId).notifier)
-        .sendMessage(text);
+        ref.read(aiChatProvider(widget.conversationId)).isTyping) {
+      return;
+    }
+    ref.read(aiChatProvider(widget.conversationId).notifier).sendMessage(text);
     _textCtrl.clear();
     _scrollToBottom();
   }
@@ -120,7 +120,7 @@ class _EmptyState extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -196,8 +196,7 @@ class _MessageBubble extends StatelessWidget {
           ],
           Flexible(
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: isUser
                     ? AppColors.primary
@@ -292,7 +291,7 @@ class _InputBar extends StatelessWidget {
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -328,7 +327,7 @@ class _InputBar extends StatelessWidget {
             style: IconButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
+              disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.4),
             ),
           ),
         ],

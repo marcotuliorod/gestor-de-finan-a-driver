@@ -62,8 +62,7 @@ class TripRepositoryImpl implements TripRepository {
   @override
   Future<Either<Failure, Trip>> updateTrip(Trip trip) async {
     try {
-      await (_db.update(_db.trips)
-            ..where((t) => t.id.equals(trip.id)))
+      await (_db.update(_db.trips)..where((t) => t.id.equals(trip.id)))
           .write($db.TripsCompanion(
         grossAmountCents: Value(trip.grossAmountCents),
         bonusAmountCents: Value(trip.bonusAmountCents),
@@ -86,8 +85,7 @@ class TripRepositoryImpl implements TripRepository {
   @override
   Future<Either<Failure, Unit>> deleteTrip(String tripId) async {
     try {
-      await (_db.update(_db.trips)
-            ..where((t) => t.id.equals(tripId)))
+      await (_db.update(_db.trips)..where((t) => t.id.equals(tripId)))
           .write($db.TripsCompanion(
         deletedAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
@@ -126,8 +124,7 @@ class TripRepositoryImpl implements TripRepository {
         'updated_at': row.updatedAt.toIso8601String(),
       });
 
-      await (_db.update(_db.trips)
-            ..where((t) => t.id.equals(tripId)))
+      await (_db.update(_db.trips)..where((t) => t.id.equals(tripId)))
           .write($db.TripsCompanion(
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),

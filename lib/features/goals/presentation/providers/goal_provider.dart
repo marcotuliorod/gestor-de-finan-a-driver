@@ -29,7 +29,8 @@ class GoalNotifier extends AsyncNotifier<void> {
     int workingDaysPerMonth = 26,
   }) async {
     state = const AsyncLoading();
-    final result = await SetMonthlyGoalUseCase(ref.read(goalRepositoryProvider))(
+    final result =
+        await SetMonthlyGoalUseCase(ref.read(goalRepositoryProvider))(
       userId: userId,
       monthlyTargetCents: monthlyTargetCents,
       workingDaysPerMonth: workingDaysPerMonth,

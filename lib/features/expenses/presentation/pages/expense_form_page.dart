@@ -59,7 +59,7 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<ExpenseCategory>(
-                value: _category,
+                initialValue: _category,
                 decoration: const InputDecoration(
                   labelText: 'Categoria',
                   border: OutlineInputBorder(),
@@ -120,7 +120,7 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
               if (_isRecurring) ...[
                 const SizedBox(height: 4),
                 DropdownButtonFormField<String>(
-                  value: _recurrenceType,
+                  initialValue: _recurrenceType,
                   decoration: const InputDecoration(
                     labelText: 'Frequência',
                     border: OutlineInputBorder(),
@@ -171,17 +171,16 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
     final amountCents =
         ((parseCurrencyInput(_amountCtrl.text) ?? 0) * 100).round();
 
-    final result =
-        await ref.read(expenseFormNotifierProvider.notifier).save(
-              userId: user.id,
-              vehicleId: vehicle?.id,
-              category: _category,
-              amountCents: amountCents,
-              description: _descCtrl.text,
-              expenseDate: _expenseDate,
-              isRecurring: _isRecurring,
-              recurrenceType: _isRecurring ? _recurrenceType : null,
-            );
+    final result = await ref.read(expenseFormNotifierProvider.notifier).save(
+          userId: user.id,
+          vehicleId: vehicle?.id,
+          category: _category,
+          amountCents: amountCents,
+          description: _descCtrl.text,
+          expenseDate: _expenseDate,
+          isRecurring: _isRecurring,
+          recurrenceType: _isRecurring ? _recurrenceType : null,
+        );
 
     if (!mounted) return;
     result.fold(

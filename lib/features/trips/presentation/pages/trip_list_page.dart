@@ -66,8 +66,7 @@ class _TripListPageState extends ConsumerState<TripListPage> {
         ),
       ),
       body: tripsAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Erro: $e')),
         data: (trips) {
           if (trips.isEmpty) {
@@ -82,8 +81,7 @@ class _TripListPageState extends ConsumerState<TripListPage> {
                   itemCount: trips.length,
                   itemBuilder: (_, i) => _TripTile(
                     trip: trips[i],
-                    platformName:
-                        platformMap[trips[i].platformId] ?? '—',
+                    platformName: platformMap[trips[i].platformId] ?? '—',
                     onDelete: () => _confirmDelete(trips[i].id),
                     onEdit: () => _openForm(trips[i]),
                   ),
@@ -181,7 +179,7 @@ class _TotalBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.income.withOpacity(0.1),
+      color: AppColors.income.withValues(alpha: 0.1),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -228,7 +226,7 @@ class _TripTile extends StatelessWidget {
       onDismissed: (_) {},
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.income.withOpacity(0.15),
+          backgroundColor: AppColors.income.withValues(alpha: 0.15),
           child: const Icon(
             Icons.directions_car_rounded,
             color: AppColors.income,

@@ -18,7 +18,8 @@ final tripRepositoryProvider = Provider<TripRepository>((ref) {
   );
 });
 
-final watchTripsProvider = StreamProvider.family<List<Trip>, (DateTime, DateTime)>(
+final watchTripsProvider =
+    StreamProvider.family<List<Trip>, (DateTime, DateTime)>(
   (ref, period) {
     final repo = ref.watch(tripRepositoryProvider);
     return repo.watchByPeriod(period.$1, period.$2);

@@ -105,7 +105,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 _ExpenseBreakdown(summary: summary),
                 const SizedBox(height: 16),
                 _DailyRevenueChart(dailyRevenues: summary.dailyRevenues),
-                if (summary.dailyRevenues.isNotEmpty) const SizedBox(height: 16),
+                if (summary.dailyRevenues.isNotEmpty)
+                  const SizedBox(height: 16),
                 const _QuickActions(),
               ],
             ),
@@ -131,9 +132,11 @@ class _MaintenanceAlertCard extends ConsumerWidget {
 
     if (alerts.isEmpty) return const SizedBox.shrink();
 
-    final overdue = alerts.where((r) =>
-        r.nextMaintenanceDate != null &&
-        r.nextMaintenanceDate!.isBefore(now)).length;
+    final overdue = alerts
+        .where((r) =>
+            r.nextMaintenanceDate != null &&
+            r.nextMaintenanceDate!.isBefore(now))
+        .length;
     final label = overdue > 0
         ? '$overdue manutenção(ões) em atraso'
         : '${alerts.length} manutenção(ões) próxima(s)';
@@ -141,7 +144,7 @@ class _MaintenanceAlertCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
-        color: AppColors.warning.withOpacity(0.12),
+        color: AppColors.warning.withValues(alpha: 0.12),
         child: ListTile(
           leading: Icon(
             Icons.warning_amber_rounded,
@@ -439,7 +442,7 @@ class _GoalCard extends StatelessWidget {
             LinearProgressIndicator(
               value: clampedProgress,
               color: barColor,
-              backgroundColor: barColor.withOpacity(0.15),
+              backgroundColor: barColor.withValues(alpha: 0.15),
               minHeight: 8,
               borderRadius: BorderRadius.circular(4),
             ),

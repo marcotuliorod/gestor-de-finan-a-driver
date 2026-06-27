@@ -58,8 +58,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   Future<Either<Failure, void>> deleteRecord(String id) async {
     try {
       final now = DateTime.now();
-      await (_db.update(_db.maintenanceRecords)
-            ..where((t) => t.id.equals(id)))
+      await (_db.update(_db.maintenanceRecords)..where((t) => t.id.equals(id)))
           .write(
         $db.MaintenanceRecordsCompanion(
           deletedAt: Value(now),
@@ -97,8 +96,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         'updated_at': row.updatedAt.toIso8601String(),
       });
 
-      await (_db.update(_db.maintenanceRecords)
-            ..where((t) => t.id.equals(id)))
+      await (_db.update(_db.maintenanceRecords)..where((t) => t.id.equals(id)))
           .write(
         $db.MaintenanceRecordsCompanion(
           syncStatus: const Value('synced'),

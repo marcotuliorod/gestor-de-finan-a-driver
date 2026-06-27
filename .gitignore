@@ -46,3 +46,9 @@ coverage/
 # Environment / secrets (never commit)
 .env
 .env.*
+
+# VS Code — pode conter dart-defines com segredos (SUPABASE_URL, ANON_KEY)
+.vscode/
+
+# macOS Pods (gerado localmente)
+macos/Pods/

@@ -23,8 +23,7 @@ class FuelRecord {
   final DateTime recordDate;
   final DateTime createdAt;
 
-  double get pricePerLiter =>
-      liters > 0 ? amountCents / (liters * 100) : 0;
+  double get pricePerLiter => liters > 0 ? amountCents / (liters * 100) : 0;
 
   @override
   bool operator ==(Object other) =>

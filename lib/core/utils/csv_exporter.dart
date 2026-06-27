@@ -4,7 +4,14 @@ import 'package:driver_finance/features/trips/domain/entities/trip.dart';
 
 String tripsToCSV(List<Trip> trips) {
   final rows = <List<dynamic>>[
-    ['Data', 'Valor Bruto (R\$)', 'Bônus (R\$)', 'Gorjeta (R\$)', 'Total (R\$)', 'Notas'],
+    [
+      'Data',
+      'Valor Bruto (R\$)',
+      'Bônus (R\$)',
+      'Gorjeta (R\$)',
+      'Total (R\$)',
+      'Notas'
+    ],
     ...trips.map(
       (t) => [
         '${t.tripDate.day.toString().padLeft(2, '0')}/${t.tripDate.month.toString().padLeft(2, '0')}/${t.tripDate.year}',

@@ -501,9 +501,7 @@ class _PlatformBreakdown extends ConsumerWidget {
             ...stats.map((s) {
               final color =
                   _platformColors[s.platformName] ?? AppColors.primary;
-              final pct = totalIncome > 0
-                  ? s.incomeCents / totalIncome
-                  : 0.0;
+              final pct = totalIncome > 0 ? s.incomeCents / totalIncome : 0.0;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Column(
@@ -544,7 +542,7 @@ class _PlatformBreakdown extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: pct,
                         minHeight: 6,
-                        backgroundColor: color.withOpacity(0.15),
+                        backgroundColor: color.withValues(alpha: 0.15),
                         valueColor: AlwaysStoppedAnimation<Color>(color),
                       ),
                     ),
@@ -592,7 +590,9 @@ class _HourlyEarningsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final hours = totalDurationMinutes ~/ 60;
     final minutes = totalDurationMinutes % 60;
-    final durationLabel = hours > 0 ? '${hours}h${minutes.toString().padLeft(2, '0')}min' : '${minutes}min';
+    final durationLabel = hours > 0
+        ? '${hours}h${minutes.toString().padLeft(2, '0')}min'
+        : '${minutes}min';
 
     return Card(
       child: Padding(

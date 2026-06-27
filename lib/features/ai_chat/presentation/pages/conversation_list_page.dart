@@ -57,7 +57,7 @@ class _EmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -101,9 +101,8 @@ class _ConversationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final date = conversation.updatedAt;
     final now = DateTime.now();
-    final isToday = date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
+    final isToday =
+        date.year == now.year && date.month == now.month && date.day == now.day;
     final dateLabel = isToday
         ? '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}'
         : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
@@ -160,7 +159,8 @@ class _ConversationTile extends StatelessWidget {
                 color: AppColors.textSecondary,
               ),
         ),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+        trailing:
+            const Icon(Icons.chevron_right, color: AppColors.textSecondary),
         onTap: () => context.push('/ai/chat/${conversation.id}'),
       ),
     );

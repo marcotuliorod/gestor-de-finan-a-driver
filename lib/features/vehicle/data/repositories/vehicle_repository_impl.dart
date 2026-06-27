@@ -84,8 +84,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
   @override
   Future<Either<Failure, Vehicle>> updateVehicle(Vehicle vehicle) async {
     try {
-      await (_db.update(_db.vehicles)
-            ..where((t) => t.id.equals(vehicle.id)))
+      await (_db.update(_db.vehicles)..where((t) => t.id.equals(vehicle.id)))
           .write($db.VehiclesCompanion(
         make: Value(vehicle.make),
         model: Value(vehicle.model),
@@ -134,8 +133,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         'updated_at': row.updatedAt.toIso8601String(),
       });
 
-      await (_db.update(_db.vehicles)
-            ..where((t) => t.id.equals(vehicleId)))
+      await (_db.update(_db.vehicles)..where((t) => t.id.equals(vehicleId)))
           .write($db.VehiclesCompanion(
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),

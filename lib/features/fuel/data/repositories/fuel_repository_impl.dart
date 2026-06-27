@@ -128,8 +128,7 @@ class FuelRepositoryImpl implements FuelRepository {
         'fuel_type': fuel.fuelType,
       });
 
-      await (_db.update(_db.expenses)
-            ..where((t) => t.id.equals(expenseId)))
+      await (_db.update(_db.expenses)..where((t) => t.id.equals(expenseId)))
           .write($db.ExpensesCompanion(
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),

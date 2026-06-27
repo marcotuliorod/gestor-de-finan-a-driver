@@ -59,7 +59,8 @@ class _MaintenanceContent extends StatelessWidget {
     final totalCents = records.fold<int>(0, (s, r) => s + r.costCents);
 
     final upcoming = records
-        .where((r) => r.nextMaintenanceKm != null || r.nextMaintenanceDate != null)
+        .where(
+            (r) => r.nextMaintenanceKm != null || r.nextMaintenanceDate != null)
         .toList()
       ..sort((a, b) {
         final aDate = a.nextMaintenanceDate;
@@ -200,7 +201,7 @@ class _UpcomingTile extends StatelessWidget {
 
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: urgentColor.withOpacity(0.12),
+        backgroundColor: urgentColor.withValues(alpha: 0.12),
         child: Icon(
           Icons.schedule_rounded,
           color: urgentColor,

@@ -51,8 +51,7 @@ class SettingsPage extends ConsumerWidget {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<bool>(
-                  builder: (_) =>
-                      VehicleFormPage(existingVehicle: vehicle),
+                  builder: (_) => VehicleFormPage(existingVehicle: vehicle),
                 ),
               ),
             ),
@@ -134,9 +133,8 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
               selected: {themeMode},
-              onSelectionChanged: (selection) => ref
-                  .read(themeModeProvider.notifier)
-                  .setMode(selection.first),
+              onSelectionChanged: (selection) =>
+                  ref.read(themeModeProvider.notifier).setMode(selection.first),
             ),
           ),
           const Divider(),

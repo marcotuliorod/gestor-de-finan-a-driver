@@ -64,10 +64,8 @@ class _MaintenanceFormPageState extends ConsumerState<MaintenanceFormPage> {
       return;
     }
 
-    final costCents =
-        ((parseCurrencyInput(_costCtrl.text) ?? 0) * 100).round();
-    final odometer =
-        int.tryParse(_odometerCtrl.text.replaceAll('.', '')) ?? 0;
+    final costCents = ((parseCurrencyInput(_costCtrl.text) ?? 0) * 100).round();
+    final odometer = int.tryParse(_odometerCtrl.text.replaceAll('.', '')) ?? 0;
     final nextKm = _nextKmCtrl.text.isNotEmpty
         ? int.tryParse(_nextKmCtrl.text.replaceAll('.', ''))
         : null;
@@ -111,7 +109,7 @@ class _MaintenanceFormPageState extends ConsumerState<MaintenanceFormPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<String>(
-                value: _type,
+                initialValue: _type,
                 decoration: const InputDecoration(
                   labelText: 'Tipo de manutenção',
                   border: OutlineInputBorder(),

@@ -61,8 +61,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   @override
   Future<Either<Failure, Unit>> deleteExpense(String expenseId) async {
     try {
-      await (_db.update(_db.expenses)
-            ..where((t) => t.id.equals(expenseId)))
+      await (_db.update(_db.expenses)..where((t) => t.id.equals(expenseId)))
           .write($db.ExpensesCompanion(
         deletedAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
@@ -98,8 +97,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         'updated_at': row.updatedAt.toIso8601String(),
       });
 
-      await (_db.update(_db.expenses)
-            ..where((t) => t.id.equals(expenseId)))
+      await (_db.update(_db.expenses)..where((t) => t.id.equals(expenseId)))
           .write($db.ExpensesCompanion(
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),

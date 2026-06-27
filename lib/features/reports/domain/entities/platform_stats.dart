@@ -9,8 +9,7 @@ class PlatformStats {
   final int incomeCents;
   final int tripCount;
 
-  int get averageCents =>
-      tripCount > 0 ? (incomeCents / tripCount).round() : 0;
+  int get averageCents => tripCount > 0 ? (incomeCents / tripCount).round() : 0;
 
   @override
   bool operator ==(Object other) =>

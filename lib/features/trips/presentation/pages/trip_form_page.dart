@@ -43,9 +43,8 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
           (t.tipAmountCents / 100).toStringAsFixed(2).replaceAll('.', ',');
       _promotionCtrl.text =
           (t.promotionCents / 100).toStringAsFixed(2).replaceAll('.', ',');
-      _cancellationCtrl.text = (t.cancellationCents / 100)
-          .toStringAsFixed(2)
-          .replaceAll('.', ',');
+      _cancellationCtrl.text =
+          (t.cancellationCents / 100).toStringAsFixed(2).replaceAll('.', ',');
       _notesCtrl.text = t.notes ?? '';
       if (t.durationMinutes != null) {
         _durationCtrl.text = t.durationMinutes.toString();
@@ -85,14 +84,12 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               platformsAsync.when(
-                loading: () =>
-                    const CircularProgressIndicator(),
+                loading: () => const CircularProgressIndicator(),
                 error: (_, __) => const SizedBox(),
                 data: (platforms) {
-                  final active =
-                      platforms.where((p) => p.isActive).toList();
+                  final active = platforms.where((p) => p.isActive).toList();
                   return DropdownButtonFormField<String>(
-                    value: _selectedPlatformId,
+                    initialValue: _selectedPlatformId,
                     decoration: const InputDecoration(
                       labelText: 'Plataforma',
                       border: OutlineInputBorder(),
@@ -105,8 +102,7 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
                           ),
                         )
                         .toList(),
-                    onChanged: (v) =>
-                        setState(() => _selectedPlatformId = v),
+                    onChanged: (v) => setState(() => _selectedPlatformId = v),
                     validator: (v) =>
                         v == null ? 'Selecione uma plataforma' : null,
                   );
@@ -214,9 +210,7 @@ class _TripFormPageState extends ConsumerState<TripFormPage> {
     final durationMinutes =
         durationText.isEmpty ? null : int.tryParse(durationText);
 
-    final result = await ref
-        .read(tripFormNotifierProvider.notifier)
-        .save(
+    final result = await ref.read(tripFormNotifierProvider.notifier).save(
           existingId: widget.existingTrip?.id,
           userId: user.id,
           platformId: _selectedPlatformId!,
@@ -263,8 +257,7 @@ class _CurrencyField extends StatelessWidget {
         prefixText: 'R\$ ',
         border: const OutlineInputBorder(),
       ),
-      keyboardType:
-          const TextInputType.numberWithOptions(decimal: true),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[\d,.]')),
       ],

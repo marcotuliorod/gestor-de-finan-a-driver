@@ -16,6 +16,9 @@ migrate_working_dir/
 *.iws
 .idea/
 
+# FVM — pin tracked via .fvmrc; local SDK symlink is private
+.fvm/
+
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id

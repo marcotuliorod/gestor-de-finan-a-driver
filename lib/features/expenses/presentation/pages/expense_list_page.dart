@@ -111,8 +111,7 @@ class _FuelTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final fuelAsync = ref.watch(watchFuelRecordsProvider);
     return fuelAsync.when(
-      loading: () =>
-          const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (records) {
         if (records.isEmpty) {
@@ -196,16 +195,14 @@ class _ExpensesTabState extends ConsumerState<_ExpensesTab> {
                   message: 'Nenhuma despesa em ${_period.label.toLowerCase()}',
                 );
               }
-              final total =
-                  expenses.fold<int>(0, (s, e) => s + e.amountCents);
+              final total = expenses.fold<int>(0, (s, e) => s + e.amountCents);
               return Column(
                 children: [
                   _TotalBanner(totalCents: total),
                   Expanded(
                     child: ListView.builder(
                       itemCount: expenses.length,
-                      itemBuilder: (_, i) =>
-                          _ExpenseTile(expense: expenses[i]),
+                      itemBuilder: (_, i) => _ExpenseTile(expense: expenses[i]),
                     ),
                   ),
                 ],
@@ -255,7 +252,7 @@ class _ExpenseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: AppColors.expense.withOpacity(0.1),
+        backgroundColor: AppColors.expense.withValues(alpha: 0.1),
         child: const Icon(
           Icons.receipt_outlined,
           color: AppColors.expense,
@@ -295,8 +292,7 @@ class _MileageTab extends ConsumerWidget {
     final range = _ExpensePeriod.thisMonth.range;
     final mileageAsync = ref.watch(watchMileageProvider(range));
     return mileageAsync.when(
-      loading: () =>
-          const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (records) {
         if (records.isEmpty) {
@@ -309,7 +305,7 @@ class _MileageTab extends ConsumerWidget {
         return Column(
           children: [
             Container(
-              color: AppColors.primary.withOpacity(0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 10,
@@ -320,10 +316,9 @@ class _MileageTab extends ConsumerWidget {
                   const Text('Total trabalho'),
                   Text(
                     '$totalWork km',
-                    style:
-                        Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                 ],
               ),
@@ -331,8 +326,7 @@ class _MileageTab extends ConsumerWidget {
             Expanded(
               child: ListView.builder(
                 itemCount: records.length,
-                itemBuilder: (_, i) =>
-                    _MileageTile(record: records[i]),
+                itemBuilder: (_, i) => _MileageTile(record: records[i]),
               ),
             ),
           ],
@@ -380,7 +374,7 @@ class _TotalBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.expense.withOpacity(0.08),
+      color: AppColors.expense.withValues(alpha: 0.08),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

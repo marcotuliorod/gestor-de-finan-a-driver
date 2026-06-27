@@ -87,6 +87,33 @@ class PlatformRepositoryImpl implements PlatformRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, Unit>> addPlatform(
+    String userId,
+    String customName,
+  ) async {
+    try {
+      final now = DateTime.now();
+      final id = generateUuid();
+      await _db.into(_db.platforms).insert(
+            $db.PlatformsCompanion(
+              id: Value(id),
+              userId: Value(userId),
+              type: const Value('custom'),
+              customName: Value(customName),
+              isActive: const Value(true),
+              createdAt: Value(now),
+              updatedAt: Value(now),
+              syncStatus: const Value('pending'),
+            ),
+          );
+      _doSyncAll(userId);
+      return right(unit);
+    } catch (e) {
+      return left(CacheFailure(e.toString()));
+    }
+  }
+
   void _syncAllToSupabase(String userId) {
     _doSyncAll(userId);
   }

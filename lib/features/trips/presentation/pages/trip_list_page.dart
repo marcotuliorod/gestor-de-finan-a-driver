@@ -84,7 +84,7 @@ class _TripListPageState extends ConsumerState<TripListPage> {
                     trip: trips[i],
                     platformName:
                         platformMap[trips[i].platformId] ?? '—',
-                    onDelete: () => _delete(trips[i].id),
+                    onDelete: () => _confirmDelete(trips[i].id),
                     onEdit: () => _openForm(trips[i]),
                   ),
                 ),
@@ -109,30 +109,30 @@ class _TripListPageState extends ConsumerState<TripListPage> {
     );
   }
 
-  Future<void> _delete(String tripId) async {
+  Future<bool> _confirmDelete(String tripId) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: const Text('Excluir corrida?'),
         content: const Text('Esta ação não pode ser desfeita.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogCtx, false),
             child: const Text('Cancelar'),
           ),
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.expense,
             ),
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogCtx, true),
             child: const Text('Excluir'),
           ),
         ],
       ),
     );
-    if (confirmed == true) {
-      await ref.read(tripFormNotifierProvider.notifier).delete(tripId);
-    }
+    if (confirmed != true || !mounted) return false;
+    await ref.read(tripFormNotifierProvider.notifier).delete(tripId);
+    return true;
   }
 }
 
@@ -210,7 +210,7 @@ class _TripTile extends StatelessWidget {
 
   final Trip trip;
   final String platformName;
-  final VoidCallback onDelete;
+  final Future<bool> Function() onDelete;
   final VoidCallback onEdit;
 
   @override
@@ -224,7 +224,7 @@ class _TripTile extends StatelessWidget {
         padding: const EdgeInsets.only(right: 16),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
-      confirmDismiss: (_) async => false,
+      confirmDismiss: (_) => onDelete(),
       onDismissed: (_) {},
       child: ListTile(
         leading: CircleAvatar(

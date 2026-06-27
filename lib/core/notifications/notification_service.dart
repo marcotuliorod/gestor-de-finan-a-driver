@@ -8,9 +8,12 @@ const _androidDetails = AndroidNotificationDetails(
   priority: Priority.high,
 );
 
+const _darwinDetails = DarwinNotificationDetails();
+
 const _notifDetails = NotificationDetails(
   android: _androidDetails,
-  iOS: DarwinNotificationDetails(),
+  iOS: _darwinDetails,
+  macOS: _darwinDetails,
 );
 
 class NotificationService {
@@ -22,13 +25,17 @@ class NotificationService {
   Future<void> init() async {
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings(
+    const darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
     await _plugin.initialize(
-      const InitializationSettings(android: androidSettings, iOS: iosSettings),
+      const InitializationSettings(
+        android: androidSettings,
+        iOS: darwinSettings,
+        macOS: darwinSettings,
+      ),
     );
     await _plugin
         .resolvePlatformSpecificImplementation<

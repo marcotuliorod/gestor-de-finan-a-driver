@@ -61,7 +61,7 @@ class SettingsPage extends ConsumerWidget {
             leading: const Icon(Icons.apps),
             title: const Text('Plataformas'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.go('/platforms'),
+            onTap: () => context.push('/platforms'),
           ),
           ListTile(
             leading: const Icon(Icons.build_outlined),

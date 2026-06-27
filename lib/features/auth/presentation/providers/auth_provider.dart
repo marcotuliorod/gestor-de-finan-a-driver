@@ -8,18 +8,10 @@ import 'package:driver_finance/features/auth/domain/usecases/sign_in_with_google
 import 'package:driver_finance/features/auth/domain/usecases/sign_out.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-final _googleSignInProvider = Provider<GoogleSignIn>(
-  (_) => GoogleSignIn(scopes: ['email']),
-);
-
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl(
-    supabase: Supabase.instance.client,
-    googleSignIn: ref.watch(_googleSignInProvider),
-  );
+  return AuthRepositoryImpl(supabase: Supabase.instance.client);
 });
 
 final authStateProvider = StreamProvider<AppUser?>((ref) {
@@ -30,7 +22,7 @@ class AuthNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<Either<Failure, AppUser>> signInWithGoogle() async {
+  Future<Either<Failure, Unit>> signInWithGoogle() async {
     state = const AsyncLoading();
     final result = await SignInWithGoogleUseCase(
       ref.read(authRepositoryProvider),

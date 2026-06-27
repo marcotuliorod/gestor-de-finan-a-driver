@@ -95,7 +95,7 @@ class LoginPage extends ConsumerWidget {
           SnackBar(content: Text(failure.message)),
         );
       },
-      (_) {},
+      (_) {}, // navegação ocorre via authStateProvider listener
     );
   }
 

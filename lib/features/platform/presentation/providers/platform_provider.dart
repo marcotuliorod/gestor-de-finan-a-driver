@@ -22,7 +22,21 @@ final watchPlatformsProvider = StreamProvider<List<AppPlatform>>((ref) {
 
 class PlatformSelectionNotifier extends AsyncNotifier<void> {
   @override
-  Future<void> build() async {}
+  Future<void> build() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+    final result = await ref.read(platformRepositoryProvider).getPlatforms();
+    result.fold(
+      (_) {},
+      (list) async {
+        if (list.isEmpty) {
+          await SeedDefaultPlatformsUseCase(
+            ref.read(platformRepositoryProvider),
+          )(userId);
+        }
+      },
+    );
+  }
 
   Future<Either<Failure, Unit>> seed(String userId) async {
     return SeedDefaultPlatformsUseCase(ref.read(platformRepositoryProvider))(
@@ -34,6 +48,10 @@ class PlatformSelectionNotifier extends AsyncNotifier<void> {
     return TogglePlatformUseCase(
       ref.read(platformRepositoryProvider),
     )(id, isActive: isActive);
+  }
+
+  Future<Either<Failure, Unit>> addPlatform(String userId, String name) {
+    return ref.read(platformRepositoryProvider).addPlatform(userId, name);
   }
 }
 

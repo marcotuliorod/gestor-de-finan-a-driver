@@ -56,6 +56,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               currentPage: _currentPage,
               totalPages: _totalPages,
               onSkip: _finish,
+              onBack: _prevPage,
             ),
             Expanded(
               child: PageView(
@@ -83,6 +84,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
   }
 
+  void _prevPage() {
+    if (_currentPage == 0) return;
+    setState(() => _currentPage--);
+    _pageCtrl.previousPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
   Future<void> _finish() async {
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool('onboarding_done', true);
@@ -96,18 +106,28 @@ class _OnboardingHeader extends StatelessWidget {
     required this.currentPage,
     required this.totalPages,
     required this.onSkip,
+    required this.onBack,
   });
 
   final int currentPage;
   final int totalPages;
   final VoidCallback onSkip;
+  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
         children: [
+          if (currentPage > 0)
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: onBack,
+            )
+          else
+            const SizedBox(width: 48),
+          const SizedBox(width: 4),
           Row(
             children: List.generate(totalPages, (i) {
               final active = i == currentPage;

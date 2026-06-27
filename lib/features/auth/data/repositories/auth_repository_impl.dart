@@ -2,19 +2,15 @@ import 'package:driver_finance/core/errors/failures.dart';
 import 'package:driver_finance/features/auth/domain/entities/app_user.dart';
 import 'package:driver_finance/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required SupabaseClient supabase,
-    required GoogleSignIn googleSignIn,
-  })  : _supabase = supabase,
-        _googleSignIn = googleSignIn;
+  }) : _supabase = supabase;
 
   final SupabaseClient _supabase;
-  final GoogleSignIn _googleSignIn;
 
   @override
   Stream<AppUser?> watchAuthState() {
@@ -33,30 +29,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, AppUser>> signInWithGoogle() async {
+  Future<Either<Failure, Unit>> signInWithGoogle() async {
     try {
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        return left(const AuthFailure('Login cancelado pelo usuário'));
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      if (idToken == null) {
-        return left(const AuthFailure('Token Google não disponível'));
-      }
-
-      final response = await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: googleAuth.accessToken,
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'com.marcotuliorod.driverfinance://login-callback',
       );
-
-      if (response.user == null) {
-        return left(const AuthFailure('Usuário não retornado pelo servidor'));
-      }
-
-      return right(_toAppUser(response.user!));
+      return right(unit);
     } on AuthException catch (e) {
       return left(AuthFailure(e.message));
     } catch (e) {
@@ -67,7 +46,6 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> signOut() async {
     try {
-      await _googleSignIn.signOut();
       await _supabase.auth.signOut();
       return right(unit);
     } catch (e) {
@@ -79,7 +57,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, Unit>> deleteAccount() async {
     try {
       await _supabase.rpc('delete_account');
-      await _googleSignIn.signOut();
       await _supabase.auth.signOut();
       return right(unit);
     } catch (e) {

@@ -1,6 +1,6 @@
 # Cronograma por Sprints — Driver Finance AI
 
-_Atualizado em 2026-06-26 | Sprint 12 completo_
+_Atualizado em 2026-08-25 | Sprint 13 completo + estabilização de CI Android_
 
 ---
 
@@ -164,14 +164,46 @@ _Atualizado em 2026-06-26 | Sprint 12 completo_
 
 ---
 
-## ⏳ Sprint 13 — Push Notifications (requer Firebase pelo usuário)
+## ✅ Sprint 13 — Notificações Locais (manutenção + meta)
 
-**Pré-requisito:** Firebase project + `google-services.json` + `GoogleService-Info.plist`
+**Status:** COMPLETO (PR #20 mergeado)
 
-| Feature | MoSCoW | Pts |
-|---------|--------|-----|
-| E9-US03: Push notification ao atingir meta mensal | S | 3 |
-| E6-US03: Notificação local de manutenção ≤7 dias | S | 3 |
+| Feature | Status |
+|---------|--------|
+| E9-US03: Notificação local ao atingir meta mensal | ✅ |
+| E6-US03: Notificação local de manutenção ≤7 dias | ✅ |
+
+Implementado com notificações locais (`flutter_local_notifications`), sem dependência de Firebase/FCM.
+
+---
+
+## ✅ Estabilização de CI/Build Android (pós Sprint 13)
+
+**Status:** COMPLETO (PRs #21, #22 mergeados)
+
+| Item | Status |
+|------|--------|
+| Core library desugaring no `android/` (requisito de dependências mais novas) | ✅ |
+| Ajuste de versão do Flutter (3.44.4 → 3.35.7) para build estável | ✅ |
+| `build-android` passa a rodar também em Pull Requests | ✅ |
+| Correções de navegação, exclusão de corridas e plataformas | ✅ |
+| Target macOS adicionado | ✅ |
+
+---
+
+## 🔄 Sprint 14-16 — Migração Supabase → Postgres self-hosted (Python/FastAPI)
+
+**Status:** EM PLANEJAMENTO — ver plano detalhado (`adr/ADR-0006` a ser criado no Sprint 16 encerra a migração)
+
+Decisão do usuário: remover toda dependência do Supabase (Auth, Postgrest, Edge Functions), substituindo por Postgres puro self-hosted (Docker/VPS) + backend próprio em Python/FastAPI.
+
+| Sprint | Escopo | Status |
+|--------|--------|--------|
+| Sprint 14 | Infra (Docker Compose Postgres+API) + backend FastAPI skeleton + Auth completo (Google/Apple/JWT próprio) | ⏳ |
+| Sprint 15 | Migração das 9 tabelas de dados (trips, expenses, fuel_records, vehicles, goals, platforms, maintenance_records, mileage_records) | ⏳ |
+| Sprint 16 | Migração do AI chat (Edge Function → endpoint FastAPI) + remoção total de `supabase_flutter`/`supabase/` + atualização de ADRs e docs | ⏳ |
+
+Esta migração substitui as "Dependências Críticas" de Supabase listadas abaixo — elas deixam de bloquear o projeto, pois o backend próprio elimina a necessidade de provisionar um projeto Supabase.
 
 ---
 
@@ -192,7 +224,11 @@ _Atualizado em 2026-06-26 | Sprint 12 completo_
 | Sprint 10 completo | 2026-06-26 | ✅ |
 | Sprint 11 completo | 2026-06-26 | ✅ |
 | Sprint 12 completo | 2026-06-26 | ✅ |
-| Sprint 13 completo | A definir (aguarda Firebase) | ⏳ |
+| Sprint 13 completo | 2026-08-25 | ✅ |
+| Estabilização de CI Android | 2026-08-25 | ✅ |
+| Sprint 14 (backend + auth) | A definir | ⏳ |
+| Sprint 15 (dados) | A definir | ⏳ |
+| Sprint 16 (AI chat + cleanup Supabase) | A definir | ⏳ |
 | **v1.0** | A definir | 🔄 |
 
 ---
@@ -201,6 +237,5 @@ _Atualizado em 2026-06-26 | Sprint 12 completo_
 
 | Dependência | Bloqueia | Status |
 |------------|---------|--------|
-| Supabase projeto criado + Auth configurado | Deploy | ⏳ Ação do usuário |
-| ANTHROPIC_API_KEY no Supabase Vault | Chat IA | ⏳ Ação do usuário |
-| Push notification provider (FCM/APNs) | E6-US03, E9-US03 | 🔄 Sprint 9 |
+| Migração Supabase → Postgres/FastAPI (Sprints 14-16) | Elimina a dependência de provisionar Supabase | 🔄 Em planejamento |
+| ANTHROPIC_API_KEY no backend próprio (env var do container) | Chat IA | ⏳ Ação do usuário (Sprint 16) |

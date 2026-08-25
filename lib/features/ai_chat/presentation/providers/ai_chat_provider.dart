@@ -3,6 +3,7 @@ import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/utils/uuid_generator.dart';
 import 'package:driver_finance/features/ai_chat/domain/entities/ai_conversation.dart';
 import 'package:driver_finance/features/ai_chat/domain/entities/ai_message.dart';
+import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -65,7 +66,7 @@ class AiChatNotifier extends FamilyNotifier<AiChatState, String?> {
     final String conversationId = state.conversationId ?? generateUuid();
     if (state.conversationId == null) {
       final db = ref.read($db.appDatabaseProvider);
-      final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
+      final userId = ref.read(currentUserIdProvider) ?? '';
       final now = DateTime.now();
       final title =
           trimmed.length > 50 ? '${trimmed.substring(0, 50)}…' : trimmed;
@@ -146,7 +147,7 @@ class AiChatNotifier extends FamilyNotifier<AiChatState, String?> {
   Future<void> _persistMessage(AiMessage msg, String conversationId) async {
     try {
       final db = ref.read($db.appDatabaseProvider);
-      final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
+      final userId = ref.read(currentUserIdProvider) ?? '';
       await db.into(db.aiMessages).insert(
             $db.AiMessagesCompanion(
               id: Value(msg.id),
@@ -179,7 +180,7 @@ final aiChatProvider =
 
 final watchConversationsProvider = StreamProvider<List<AiConversation>>((ref) {
   final db = ref.watch($db.appDatabaseProvider);
-  final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
+  final userId = ref.watch(currentUserIdProvider) ?? '';
   return (db.select(db.aiConversations)
         ..where((t) => t.userId.equals(userId))
         ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))

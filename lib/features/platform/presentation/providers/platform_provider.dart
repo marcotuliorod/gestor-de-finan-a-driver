@@ -1,5 +1,6 @@
 import 'package:driver_finance/core/database/app_database.dart';
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:driver_finance/features/platform/data/repositories/platform_repository_impl.dart';
 import 'package:driver_finance/features/platform/domain/entities/app_platform.dart';
 import 'package:driver_finance/features/platform/domain/repositories/platform_repository.dart';
@@ -23,7 +24,7 @@ final watchPlatformsProvider = StreamProvider<List<AppPlatform>>((ref) {
 class PlatformSelectionNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final userId = ref.read(currentUserIdProvider);
     if (userId == null) return;
     final result = await ref.read(platformRepositoryProvider).getPlatforms();
     result.fold(

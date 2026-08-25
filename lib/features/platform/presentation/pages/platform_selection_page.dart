@@ -1,8 +1,8 @@
+import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:driver_finance/features/platform/domain/entities/app_platform.dart';
 import 'package:driver_finance/features/platform/presentation/providers/platform_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PlatformSelectionPage extends ConsumerWidget {
   const PlatformSelectionPage({super.key});
@@ -73,8 +73,7 @@ class PlatformSelectionPage extends ConsumerWidget {
             onPressed: () {
               final name = ctrl.text.trim();
               if (name.isEmpty) return;
-              final userId =
-                  Supabase.instance.client.auth.currentUser?.id ?? '';
+              final userId = ref.read(currentUserIdProvider) ?? '';
               ref
                   .read(platformSelectionNotifierProvider.notifier)
                   .addPlatform(userId, name);

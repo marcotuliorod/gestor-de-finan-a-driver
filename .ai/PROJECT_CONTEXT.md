@@ -1,7 +1,7 @@
 # Project Context
 
 _Documento vivo — atualizado pelo Documentation Agent ao final de cada ciclo._
-_Última atualização: 2026-06-26 | Fase: Implementation — Sprint 8 Completo_
+_Última atualização: 2026-08-25 | Fase: Implementation — Sprint 13 Completo + estabilização de CI Android. Próxima prioridade: migração Supabase → Postgres/FastAPI (Sprints 14-16, ver ADR-0006 planejado)._
 
 ---
 
@@ -35,10 +35,18 @@ _Última atualização: 2026-06-26 | Fase: Implementation — Sprint 8 Completo_
 ## Estado Atual
 
 - **Fase:** Implementation
-- **Sprint atual:** Sprint 9 (a iniciar)
-- **PRs mergeados:** #1 → #13 (todos com CI verde)
+- **Sprint atual:** Sprint 13 completo; **Sprint 14 implementado nesta sessão** (backend FastAPI + auth completo, ver abaixo) — ainda não commitado/revisado em PR; Sprints 15-16 pendentes
+- **PRs mergeados:** #1 → #22 (todos com CI verde)
 - **Features implementadas:** ver inventário abaixo
-- **Features pendentes:** ver backlog residual abaixo
+- **Features pendentes:** ver backlog residual abaixo (reduzido a 2 itens — quase tudo do backlog original já foi entregue nos Sprints 9-13)
+
+### Sprint 14 — Backend FastAPI + Auth (implementado, não commitado)
+
+Criado `backend/` (FastAPI + asyncpg + PyJWT), `docker-compose.yml` + `.env.example` na raiz, migrations `0001-0003` (`users`, `refresh_tokens`, trigger), rotas `/api/v1/auth/{google,apple,refresh,logout,me,account}`. Validado localmente: 10/10 testes `pytest` passando (mock dos verificadores Google/Apple) contra Postgres real em container, e build da imagem Docker de produção (`docker compose build api`) bem-sucedido.
+
+No Flutter: `lib/core/network/api_client.dart` (Dio + interceptor de refresh automático em 401) e `lib/core/network/auth_session.dart` (sessão local via `flutter_secure_storage`, substitui o que o Supabase Auth fazia); `auth_repository_impl.dart` e `auth_provider.dart` reescritos para o backend próprio (Google via `google_sign_in` nativo, não mais o fluxo de redirect do Supabase); corrigidas as 4 leituras diretas de `Supabase.instance.client.auth` fora da camada de auth. `flutter analyze`/`flutter test` **não foram executados** nesta sessão (Flutter/Dart não estão instalados no ambiente) — revisar/rodar antes de commitar.
+
+Desvio deliberado do plano original: `lib/core/network/supabase_client.dart` e o init condicional do Supabase em `main.dart` foram **mantidos** (não deletados) — os 9 repositórios de dados (trips, expenses, etc.) ainda dependem deles até o Sprint 15, e apagá-los agora quebraria essas features, contrariando o próprio critério de pronto do Sprint 14.
 
 ## Proposta de Valor
 
@@ -109,22 +117,50 @@ _Última atualização: 2026-06-26 | Fase: Implementation — Sprint 8 Completo_
 | E6-US05 | Card de custo total de manutenção | ✅ |
 | E4-US07 | Filtro de período nas despesas (mês / 3 meses / ano) | ✅ |
 
+### ✅ Sprint 9 — Polish Final + Backlog Must-Have
+| ID | Feature | Status |
+|----|---------|--------|
+| E6-US03 | Alerta in-app de manutenção próxima (card no dashboard) | ✅ |
+| E7-US09 | Gráfico de receita diária no dashboard | ✅ |
+| E10-US01 | Edição de perfil (nome) via Settings | ✅ |
+
+### ✅ Sprint 10 — Quick Wins
+| ID | Feature | Status |
+|----|---------|--------|
+| E4-US06 | Despesas recorrentes (IPVA, seguro) — UI no VehicleFormPage | ✅ |
+| E7-US10 | ROI do veículo no VehicleFormPage | ✅ |
+| E1-US02 | Apple Sign-In (iOS) | ✅ |
+
+### ✅ Sprint 11 — Dados e Exportação
+| ID | Feature | Status |
+|----|---------|--------|
+| E8-US03 | Histórico de conversas IA (persistência + listagem) | ✅ |
+| E10-US04 | Export CSV de corridas e despesas | ✅ |
+
+### ✅ Sprint 12 — Ganho por Hora
+| ID | Feature | Status |
+|----|---------|--------|
+| E7-US04 | Campo duração (min) na corrida + card R$/hora nos Relatórios | ✅ |
+
+### ✅ Sprint 13 — Notificações Locais
+| ID | Feature | Status |
+|----|---------|--------|
+| E9-US03 | Notificação local ao atingir meta mensal | ✅ |
+| E6-US03 | Notificação local de manutenção ≤7 dias | ✅ |
+
+### ✅ Estabilização de CI/Build Android (pós Sprint 13)
+Core library desugaring, ajuste de versão do Flutter (3.35.7), `build-android` em PRs, correções de navegação/exclusão, target macOS adicionado.
+
 ## Backlog Residual (não implementado)
 
 | ID | Feature | MoSCoW | Pts | Obs |
 |----|---------|--------|-----|-----|
-| E6-US03 | Alertas push de manutenção (por km ou data) | M | 4 | Requer push notification setup |
-| E7-US09 | Gráfico de lucro diário no dashboard | S | 4 | fl_chart disponível |
-| E7-US04 | Ganho por hora (requer registro de horas) | S | 3 | Depende de campo de horas em Trip |
-| E4-US06 | Despesas recorrentes (IPVA, seguro) | S | 3 | |
-| E9-US03 | Push notification ao atingir meta diária | S | 3 | Junto com E6-US03 |
-| E10-US01 | Edição de perfil (nome, foto) | S | 2 | |
 | E5-US04 | Sugestão automática de odômetro | S | 2 | |
-| E1-US02 | Apple Sign-In (iOS only) | S | 3 | Bloqueado por Apple Developer |
-| E10-US04 | Export CSV de corridas e despesas | C | 4 | Requer share_plus |
-| E7-US10 | ROI do veículo | C | 3 | |
-| E8-US03 | Histórico de conversas IA | C | 3 | |
 | E2-US05 | Plataforma customizada | C | 2 | |
+
+## Próxima Prioridade: Migração Supabase → Postgres/FastAPI (Sprints 14-16)
+
+Decisão do usuário: remover toda referência ao Supabase do projeto, substituindo por Postgres puro self-hosted (Docker/VPS) + backend próprio em **Python/FastAPI**. Detalha o design, schema, faseamento e riscos no plano de implementação da sessão (backend FastAPI + asyncpg + JWT próprio + verificação Google/Apple via JWKS + RLS via `current_setting`). Um novo `adr/ADR-0006` será criado ao final do Sprint 16, superseding ADR-0003 e atualizando ADR-0005. Ver seção "Dependências Externas" abaixo, que muda de "Supabase" para "Postgres self-hosted + backend próprio" ao longo dessa migração.
 
 ## ADRs Ativos
 
@@ -152,22 +188,22 @@ _Última atualização: 2026-06-26 | Fase: Implementation — Sprint 8 Completo_
 
 | Serviço | Uso | Status |
 |---------|-----|--------|
-| Supabase | Backend, Auth, DB, Edge Functions | Implementado (código) |
-| Claude API (Anthropic) | Chat IA via Edge Function | Implementado (código) |
-| Google Sign-In | Auth social | Implementado (código) |
-| Apple Sign-In | Auth social (iOS) | Pendente |
+| Supabase | Backend, Auth, DB, Edge Functions | Implementado (código) — **em migração para Postgres self-hosted + backend próprio Python/FastAPI, Sprints 14-16** |
+| Claude API (Anthropic) | Chat IA via Edge Function | Implementado (código) — migra para endpoint FastAPI no Sprint 16 (SDK oficial `anthropic` Python) |
+| Google Sign-In | Auth social | Implementado (código, via `signInWithOAuth` do Supabase) — migra para `google_sign_in` nativo no Sprint 14 |
+| Apple Sign-In | Auth social (iOS) | Implementado (Sprint 10) |
 | Sentry | Monitoramento de erros | Pendente configuração |
 
 ## Ações Pendentes do Usuário (infraestrutura)
 
 | Ação | Prioridade |
 |------|------------|
-| Criar projeto Supabase e executar migrations | Alta |
-| Configurar Google OAuth no Supabase Auth | Alta |
-| Adicionar ANTHROPIC_API_KEY ao Supabase Vault | Alta |
-| Deploy da Edge Function `ai-chat` | Alta |
-| Adicionar SUPABASE_URL + SUPABASE_ANON_KEY ao GitHub Secrets | Alta |
+| Provisionar VPS + Docker para Postgres + backend FastAPI (Sprint 14) | Alta |
+| Configurar Google/Apple OAuth client IDs para o backend próprio (Sprint 14) | Alta |
+| Adicionar ANTHROPIC_API_KEY como env var do container `api` (Sprint 16) | Alta |
 | Configurar Sentry DSN | Média |
+
+_Itens anteriores sobre provisionamento de projeto Supabase foram removidos — tornam-se obsoletos com a migração para backend próprio._
 
 ## Log de Alterações Recentes
 
@@ -181,3 +217,9 @@ _Última atualização: 2026-06-26 | Fase: Implementation — Sprint 8 Completo_
 | 2026-06-26 | Manutenções CRUD | Sprint 6 |
 | 2026-06-26 | Platform analytics (Reports) + Depreciação (Dashboard) | Sprint 7 |
 | 2026-06-26 | AI suggestions ×6, Upcoming maintenance, Expense period filter | Sprint 8 |
+| 2026-06-26 | Maintenance alert card, Daily revenue chart, Profile name edit | Sprint 9 |
+| 2026-06-26 | Recurring expenses UI, Vehicle ROI, Apple Sign-In | Sprint 10 |
+| 2026-06-26 | AI chat history, CSV export | Sprint 11 |
+| 2026-06-26 | Trip duration field + R$/hora nos Relatórios | Sprint 12 |
+| 2026-08-25 | Notificações locais (manutenção + meta) | Sprint 13 |
+| 2026-08-25 | Estabilização de CI/build Android (desugaring, versão Flutter, target macOS) | Pós Sprint 13 |

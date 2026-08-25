@@ -1,4 +1,6 @@
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
+import 'package:driver_finance/core/network/auth_session.dart';
 import 'package:driver_finance/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:driver_finance/features/auth/domain/entities/app_user.dart';
 import 'package:driver_finance/features/auth/domain/repositories/auth_repository.dart';
@@ -8,14 +10,23 @@ import 'package:driver_finance/features/auth/domain/usecases/sign_in_with_google
 import 'package:driver_finance/features/auth/domain/usecases/sign_out.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl(supabase: Supabase.instance.client);
+  return AuthRepositoryImpl(
+    apiClient: ref.watch(apiClientProvider),
+    session: ref.watch(authSessionProvider),
+  );
 });
 
 final authStateProvider = StreamProvider<AppUser?>((ref) {
   return ref.watch(authRepositoryProvider).watchAuthState();
+});
+
+/// Id do usuário logado, reativo a login/logout — substitui as leituras
+/// diretas de `Supabase.instance.client.auth.currentUser?.id` que existiam
+/// fora da camada de auth.
+final currentUserIdProvider = Provider<String?>((ref) {
+  return ref.watch(authStateProvider).valueOrNull?.id;
 });
 
 class AuthNotifier extends AsyncNotifier<void> {

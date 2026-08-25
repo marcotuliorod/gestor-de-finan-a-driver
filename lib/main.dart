@@ -1,4 +1,5 @@
 import 'package:driver_finance/app.dart';
+import 'package:driver_finance/core/network/auth_session.dart';
 import 'package:driver_finance/core/network/supabase_client.dart';
 import 'package:driver_finance/core/notifications/notification_service.dart';
 import 'package:driver_finance/core/providers/shared_preferences_provider.dart';
@@ -10,6 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // TODO(sprint-15): SUPABASE_URL/SUPABASE_ANON_KEY seguem em uso só pelos
+  // repositórios de dados (trips, expenses, etc.) até serem migrados para o
+  // backend próprio. Auth já usa API_BASE_URL (ver AuthSession/ApiClient).
   const supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: '');
   const supabaseAnonKey =
       String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: '');
@@ -21,6 +25,9 @@ Future<void> main() async {
       anonKey: supabaseAnonKey,
     );
   }
+
+  final authSession = AuthSession();
+  await authSession.load();
 
   await NotificationService.instance.init();
 
@@ -35,6 +42,7 @@ Future<void> main() async {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
+          authSessionProvider.overrideWithValue(authSession),
         ],
         child: const DriverFinanceApp(),
       ),

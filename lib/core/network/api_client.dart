@@ -108,7 +108,7 @@ class ApiClient {
         error,
         withScope: (scope) {
           scope.setTag('sync_resource', resource);
-          scope.setExtra('sync_record_id', id);
+          scope.setTag('sync_record_id', id);
         },
       ),
     );

@@ -59,7 +59,7 @@ _Gerado pelo Architect Agent | 2026-06-26 | DDD: Entities, Value Objects, Aggreg
 ### Driver (Motorista)
 ```dart
 class Driver {
-  final String id;                     // UUID — Supabase Auth UID
+  final String id;                     // UUID — id do usuário no backend próprio
   final String email;
   final String? displayName;
   final String? avatarUrl;

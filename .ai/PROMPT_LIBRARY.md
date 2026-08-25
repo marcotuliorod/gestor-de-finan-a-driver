@@ -6,8 +6,8 @@ _Consulte ANTES de criar qualquer prompt do zero. Use `{{VARIÁVEL}}` para subst
 
 ## Índice
 
-1. [CRUD — Flutter + Supabase](#1-crud--flutter--supabase)
-2. [REST API — Supabase RPC / Edge Function](#2-rest-api--supabase-rpc--edge-function)
+1. [CRUD — Flutter + backend FastAPI](#1-crud--flutter--backend-fastapi)
+2. [REST API — Endpoint FastAPI](#2-rest-api--endpoint-fastapi)
 3. [Flutter Widget — Feature Screen](#3-flutter-widget--feature-screen)
 4. [Flutter Widget — Reusable Component](#4-flutter-widget--reusable-component)
 5. [React Component (futuro)](#5-react-component-futuro)
@@ -16,12 +16,12 @@ _Consulte ANTES de criar qualquer prompt do zero. Use `{{VARIÁVEL}}` para subst
 8. [Test Suite — Dart/Flutter](#8-test-suite--dartflutter)
 9. [Refactoring](#9-refactoring)
 10. [Performance Optimization](#10-performance-optimization)
-11. [Database Migration — PostgreSQL/Supabase](#11-database-migration--postgresqlsupabase)
+11. [Database Migration — PostgreSQL (backend/migrations)](#11-database-migration--postgresql-backendmigrations)
 12. [Security Hardening](#12-security-hardening)
 
 ---
 
-## 1. CRUD — Flutter + Supabase
+## 1. CRUD — Flutter + backend FastAPI
 
 **Use quando:** Criar operações completas de criação, leitura, atualização e exclusão para uma entidade.
 
@@ -35,7 +35,8 @@ _Consulte ANTES de criar qualquer prompt do zero. Use `{{VARIÁVEL}}` para subst
 ```
 Implemente um módulo CRUD completo para a entidade {{ENTITY_NAME}} no projeto Driver Finance AI.
 
-Stack: Flutter/Dart, Clean Architecture, Riverpod, Drift (local), Supabase (remoto).
+Stack: Flutter/Dart (Clean Architecture, Riverpod, Drift local) + backend próprio
+Python/FastAPI (asyncpg, Postgres self-hosted).
 
 Entidade:
 - Nome: {{ENTITY_NAME}}
@@ -45,7 +46,7 @@ Entidade:
 - Soft delete: {{SOFT_DELETE}}
 
 Estrutura a criar (Feature First):
-src/features/[feature]/
+lib/features/[feature]/
   domain/
     entities/{{entity_name}}.dart           — entidade pura
     repositories/{{entity_name}}_repository.dart — interface
@@ -54,64 +55,65 @@ src/features/[feature]/
     use_cases/update_{{entity_name}}.dart
     use_cases/delete_{{entity_name}}.dart
   data/
-    models/{{entity_name}}_model.dart       — com fromJson/toJson
-    repositories/{{entity_name}}_repository_impl.dart
-    sources/local_{{entity_name}}_source.dart  — Drift
-    sources/remote_{{entity_name}}_source.dart — Supabase
+    repositories/{{entity_name}}_repository_impl.dart — Drift local + ApiClient remoto
   presentation/
     providers/{{entity_name}}_provider.dart  — Riverpod AsyncNotifier
     pages/{{entity_name}}_list_page.dart
     pages/{{entity_name}}_form_page.dart
     widgets/{{entity_name}}_card.dart
 
+backend/app/resources/{{table_name}}.py — router FastAPI (ver trips.py como referência)
+backend/migrations/{{NNNN}}_create_{{table_name}}.sql
+
 Padrões obrigatórios:
 - Use Either<Failure, T> para todos os use cases
 - Drift table com todas as colunas necessárias incluindo soft delete
-- RLS no Supabase (policy: auth.uid() = user_id)
-- Offline First: escreve local → sync queue → Supabase
+- RLS no Postgres (policy: current_setting('app.current_user_id', true)::uuid = user_id)
+- Offline First: escreve local → `PUT /api/v1/{{table_name}}/{id}` fire-and-forget via `ApiClient`
+  (falha de sync vai para `ApiClient.reportSyncFailure`, nunca descartada silenciosamente)
 - Riverpod: AsyncNotifier com estados loading/data/error
 
 Consulte KNOWLEDGE_BASE.md antes de criar. Consulte CODING_STANDARDS.md para nomenclatura.
-Saída: apenas código com paths. Sem prosa. Inclua stubs de teste.
+Saída: apenas código com paths. Sem prosa. Inclua stubs de teste (pytest no backend, flutter_test no app).
 ```
 
 ---
 
-## 2. REST API — Supabase RPC / Edge Function
+## 2. REST API — Endpoint FastAPI
 
-**Use quando:** Criar operação de banco complexa (RPC) ou lógica serverless (Edge Function).
+**Use quando:** Criar endpoint novo no backend (`backend/app/resources/` ou `backend/app/{domínio}/`).
 
 **Variáveis:**
-- `{{FUNCTION_NAME}}` — ex: `get_monthly_summary`, `calculate_profit`
-- `{{FUNCTION_TYPE}}` — `RPC` ou `Edge Function`
-- `{{PARAMETERS}}` — ex: `user_id UUID, month INT, year INT`
-- `{{RETURN_TYPE}}` — ex: `TABLE(date DATE, profit NUMERIC)`
+- `{{ENDPOINT_NAME}}` — ex: `monthly-summary`, `platform-stats`
+- `{{HTTP_METHOD}}` — `GET`, `POST`, `PUT`, `DELETE`
+- `{{PARAMETERS}}` — path/query/body params
+- `{{RETURN_SHAPE}}` — schema Pydantic de resposta
 - `{{BUSINESS_LOGIC}}` — descrição da lógica
-- `{{AUTH_REQUIREMENT}}` — `authenticated` ou `anon`
+- `{{AUTH_REQUIREMENT}}` — `authenticated` (via `Depends(current_user_id)`) ou público
 
 ```
-Crie uma {{FUNCTION_TYPE}} no Supabase com o nome `{{FUNCTION_NAME}}`.
+Crie um endpoint {{HTTP_METHOD}} `/api/v1/{{ENDPOINT_NAME}}` no backend FastAPI.
 
 Parâmetros: {{PARAMETERS}}
-Retorno: {{RETURN_TYPE}}
+Retorno: {{RETURN_SHAPE}}
 Auth: {{AUTH_REQUIREMENT}}
 Lógica: {{BUSINESS_LOGIC}}
 
-Para RPC — produza:
-1. SQL da função PostgreSQL (PL/pgSQL)
-2. Migração Supabase em supabase/migrations/
-3. RLS: garanta que usuário só acessa seus próprios dados
-4. Comentário SQL explicando a lógica de negócio
+Produza:
+1. Router em backend/app/resources/{{resource_name}}.py (ou novo módulo, seguindo o
+   padrão de backend/app/auth/router.py e backend/app/resources/trips.py)
+2. Schema(s) Pydantic para request/response
+3. Query via asyncpg usando `Depends(authenticated_conn)` (RLS já escopa por usuário)
+   e `Depends(current_user_id)` quando precisar do id explicitamente
+4. Tratamento de erro: deixe `asyncpg.PostgresError` propagar (o handler global em
+   main.py já mapeia para 400); use HTTPException para 401/403/404 explícitos
+5. Registre o router em backend/app/main.py
 
-Para Edge Function — produza:
-1. supabase/functions/{{function_name}}/index.ts
-2. Validação de input com Zod
-3. Auth check via Supabase JWT
-4. Tratamento de erro com status codes corretos (400, 401, 500)
-5. Resposta JSON tipada
+Padrão de erro (automático via exception handler global):
+{ "detail": "mensagem" }
 
-Padrão de erro:
-{ "error": "mensagem", "code": "ERROR_CODE" }
+Teste em backend/tests/test_{{resource_name}}.py com pytest + httpx.AsyncClient
+(ver test_resources.py para o padrão de fixtures `client`/`authed_client`).
 
 Consulte ARCHITECTURE.md (seção de segurança e RLS) antes de implementar.
 ```
@@ -340,7 +342,7 @@ Saída: arquivos modificados. Sem prosa.
 
 ---
 
-## 11. Database Migration — PostgreSQL/Supabase
+## 11. Database Migration — PostgreSQL (backend/migrations)
 
 **Use quando:** Criar ou alterar schema do banco de dados.
 
@@ -351,7 +353,7 @@ Saída: arquivos modificados. Sem prosa.
 - `{{ZERO_DOWNTIME}}` — `true` ou `false`
 
 ```
-Crie migração Supabase: {{MIGRATION_PURPOSE}}
+Crie migração Postgres: {{MIGRATION_PURPOSE}}
 
 Mudanças:
 - Tabelas: {{TABLE_CHANGES}}
@@ -364,16 +366,22 @@ Linhas estimadas afetadas: {{ROW_COUNT_ESTIMATE}}
 Zero-downtime obrigatório: {{ZERO_DOWNTIME}}
 
 Regras:
-- Toda nova tabela: id UUID PK, user_id FK, created_at, updated_at, deleted_at
-- RLS obrigatória: policy usando auth.uid() = user_id
+- Toda nova tabela: id UUID PK, user_id FK REFERENCES users(id) ON DELETE CASCADE,
+  created_at, updated_at, deleted_at
+- RLS obrigatória: policy usando current_setting('app.current_user_id', true)::uuid = user_id
+  (ver backend/migrations/0004_create_vehicles.sql como referência)
+- GRANT automático para a role driver_finance_app via ALTER DEFAULT PRIVILEGES já
+  configurado em 0012_create_app_role.sql — não precisa repetir por migration
 - Índice em toda FK e coluna frequente em WHERE
-- Incluir rollback (Down migration) completo
 - Comentários SQL nas regras de negócio não óbvias
-- Se zero-downtime: usar ADD COLUMN nullable antes de NOT NULL
+- Este runner (backend/tool/migrate.py) não tem Down migration automático —
+  migrations são sempre forward-only; para reverter, escreva uma nova migration
+  numerada que desfaz a anterior
 
-Localização: supabase/migrations/{{TIMESTAMP}}_{{MIGRATION_PURPOSE}}.sql
+Localização: backend/migrations/{{NNNN}}_{{MIGRATION_PURPOSE}}.sql (próximo número
+sequencial disponível)
 
-Saída: SQL de Up + SQL de Down. Sem prosa.
+Saída: SQL da migration. Sem prosa.
 ```
 
 ---
@@ -394,7 +402,7 @@ O que deve ser logado: {{AUDIT_LOG_ITEMS}}
 Regras:
 - Não quebre funcionalidade existente
 - Consulte REVIEW_CHECKLIST.md Seção 2 como guia
-- Secrets: nunca no código — use Supabase Vault ou env vars
+- Secrets: nunca no código — use env vars (`.env`, nunca commitado)
 - Dados enviados para Claude API: sanitize antes (remova nome, CPF, telefone)
 - Erros ao usuário: nunca exponha detalhes internos
 

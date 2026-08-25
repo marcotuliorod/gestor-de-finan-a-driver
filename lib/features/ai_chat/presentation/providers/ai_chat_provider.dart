@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
+import 'package:driver_finance/core/network/api_client.dart';
 import 'package:driver_finance/core/utils/uuid_generator.dart';
 import 'package:driver_finance/features/ai_chat/domain/entities/ai_conversation.dart';
 import 'package:driver_finance/features/ai_chat/domain/entities/ai_message.dart';
 import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AiChatState {
   const AiChatState({
@@ -96,9 +96,9 @@ class AiChatNotifier extends FamilyNotifier<AiChatState, String?> {
     );
 
     try {
-      final response = await Supabase.instance.client.functions.invoke(
-        'ai-chat',
-        body: {
+      final response = await ref.read(apiClientProvider).dio.post<Map<String, dynamic>>(
+        '/api/v1/ai/chat',
+        data: {
           'messages': state.messages
               .where((m) => !m.isError)
               .map((m) => {'role': m.role, 'content': m.content})
@@ -106,10 +106,7 @@ class AiChatNotifier extends FamilyNotifier<AiChatState, String?> {
         },
       );
 
-      final data = response.data;
-      final assistantContent = (data is Map<String, dynamic>)
-          ? (data['content'] as String? ?? '')
-          : '';
+      final assistantContent = response.data?['content'] as String? ?? '';
 
       final assistantMsg = AiMessage(
         id: generateUuid(),

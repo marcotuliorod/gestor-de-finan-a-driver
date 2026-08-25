@@ -19,7 +19,7 @@ _Artefatos de planejamento gerados pelo Planner Agent. Consulte antes de impleme
 | [06-TECHNICAL_ARCHITECTURE.md](06-TECHNICAL_ARCHITECTURE.md) | Arquitetura técnica detalhada | Completo |
 | [07-DOMAIN_MODEL.md](07-DOMAIN_MODEL.md) | Modelo de domínio DDD | Completo |
 | [08-DATA_MODEL.md](08-DATA_MODEL.md) | Schema PostgreSQL + SQLite | Completo |
-| [09-API_CONTRACTS.md](09-API_CONTRACTS.md) | Contratos de API Supabase | Completo |
+| [09-API_CONTRACTS.md](09-API_CONTRACTS.md) | Contratos de API (histórico — ver ADR-0006 para a API real) | Completo |
 
 ## Artefatos de UX e Design
 

@@ -31,9 +31,10 @@ _Consulte antes de qualquer decisão técnica para evitar conflitos e retrabalho
 |----|------|--------|--------|---------|
 | ADR-0001 | 2026-06-26 | Adotar Framework Multi-Agente Baseado em Prompts | Accepted | Framework Init |
 | ADR-0002 | 2026-06-26 | Flutter como Plataforma UI Cross-Platform | Accepted | PRD — Tech Stack |
-| ADR-0003 | 2026-06-26 | Supabase + PostgreSQL como Backend | Accepted | PRD — Tech Stack |
+| ADR-0003 | 2026-06-26 | Supabase + PostgreSQL como Backend | **Superseded por ADR-0006** | PRD — Tech Stack |
 | ADR-0004 | 2026-06-26 | Clean Architecture + DDD + Feature First | Accepted | PRD — Tech Stack |
-| ADR-0005 | 2026-06-26 | Offline First com SQLite (Drift) + Sync Supabase | Accepted | PRD — Req. Não Funcionais |
+| ADR-0005 | 2026-06-26 | Offline First com SQLite (Drift) + Sync backend próprio | Accepted (atualizado) | PRD — Req. Não Funcionais |
+| ADR-0006 | 2026-08-25 | Backend próprio (Python/FastAPI) + Postgres self-hosted, substituindo Supabase | Accepted | Decisão do usuário |
 
 ---
 

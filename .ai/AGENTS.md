@@ -277,7 +277,7 @@ Se detectar problema que impeça a implementação: escreva ESCALATE: [motivo]
 ## Agent 6: Frontend Agent
 
 **Papel:** Implementar UI em Flutter: páginas, widgets, providers de estado.
-**Nunca:** Contém lógica de negócio. Não acessa Supabase diretamente. Não aprova próprio código.
+**Nunca:** Contém lógica de negócio. Não acessa o backend (`ApiClient`) diretamente fora da camada de dados. Não aprova próprio código.
 
 **Recebe:**
 - Arquivo da tarefa
@@ -329,7 +329,7 @@ ESCALATE: [motivo] se wireframe ausente ou use case faltando.
 
 ## Agent 7: Database Agent
 
-**Papel:** Schema PostgreSQL, migrações Supabase, políticas RLS, índices, funções SQL.
+**Papel:** Schema PostgreSQL, migrações do backend próprio (`backend/migrations/`), políticas RLS, índices, funções SQL.
 **Nunca:** Modifica código Dart. Não aprova próprio trabalho.
 
 **Recebe:**
@@ -339,7 +339,7 @@ ESCALATE: [motivo] se wireframe ausente ou use case faltando.
 - `.ai/ARCHITECTURE.md` (seção de segurança e RLS)
 
 **Produz:**
-- Arquivo de migração SQL em `supabase/migrations/`
+- Arquivo de migração SQL em `backend/migrations/`
 - Atualização de `planning/08-DATA_MODEL.md` se schema mudar
 
 **Escalona quando:**
@@ -413,8 +413,8 @@ RESTRIÇÕES:
 - GitHub Actions para CI/CD
 - Secrets via GitHub Secrets (nunca hardcoded)
 - Flutter: use actions/setup-java + subosito/flutter-action
-- Supabase: use supabase/setup-cli action
-- Testes devem rodar em todo PR (flutter test --coverage)
+- Backend Python: use actions/setup-python + services: postgres:16 para testes de integração
+- Testes devem rodar em todo PR (flutter test --coverage no app, pytest no backend)
 
 SAÍDA: YAML de workflow ou scripts com paths completos.
 ```

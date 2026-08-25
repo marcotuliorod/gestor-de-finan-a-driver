@@ -34,6 +34,7 @@ jobs:
       JWT_SECRET: ci-test-secret
       GOOGLE_CLIENT_ID: ci-test-google-client-id
       APPLE_BUNDLE_ID: com.marcotuliorod.driver_finance
+      ANTHROPIC_API_KEY: ci-test-anthropic-key
 
     steps:
       - uses: actions/checkout@v4
@@ -127,8 +128,6 @@ jobs:
         run: |
           flutter build apk --debug \
             --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }} \
-            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-            --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
             --dart-define=SENTRY_DSN=${{ secrets.SENTRY_DSN }}
 
       - name: Upload APK artifact

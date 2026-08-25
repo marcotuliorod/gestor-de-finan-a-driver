@@ -8,7 +8,7 @@ class AppDelegate: FlutterAppDelegate {
   }
 
   override func application(_ application: NSApplication, open urls: [URL]) {
-    // Forward deep link URLs to Flutter plugins (Supabase OAuth redirect via app_links)
+    // Forward deep link URLs to Flutter plugins (Sign in with Apple, etc.)
     super.application(application, open: urls)
   }
 }

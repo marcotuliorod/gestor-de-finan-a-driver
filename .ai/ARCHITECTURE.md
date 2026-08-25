@@ -19,14 +19,15 @@ _Atualizado pelo Architect Agent. Consulte antes de qualquer decisão técnica._
               ┌───────────────────────────────┤
               ↓                               ↓
    ┌──────────────────┐            ┌──────────────────┐
-   │  Local SQLite    │            │   Supabase        │
-   │  (Drift ORM)     │◄──sync────►│  PostgreSQL +     │
-   │  Offline-First   │            │  Auth + Storage   │
-   └──────────────────┘            └──────────────────┘
+   │  Local SQLite    │            │  Backend próprio  │
+   │  (Drift ORM)     │◄──sync────►│  (Python/FastAPI  │
+   │  Offline-First   │            │  + Postgres)      │
+   └──────────────────┘            └────────┬─────────┘
                                               │
                                    ┌──────────────────┐
                                    │  Claude API       │
-                                   │  (IA Module)      │
+                                   │  (chamada server- │
+                                   │   side pela API)  │
                                    └──────────────────┘
 ```
 
@@ -43,11 +44,11 @@ _Atualizado pelo Architect Agent. Consulte antes de qualquer decisão técnica._
 - Use Cases (um por operação de negócio)
 - Interfaces de repositórios (abstrações)
 - Domain Events para operações críticas
-- Zero imports de Flutter ou Supabase nesta camada
+- Zero imports de Flutter ou de clientes de rede (Dio/ApiClient) nesta camada
 
 ### Data Layer (`src/features/*/data/`)
 - Implementações dos repositórios
-- Data Sources: `local/` (Drift) e `remote/` (Supabase)
+- Data Sources: `local/` (Drift) e `remote/` (`ApiClient` → backend FastAPI próprio)
 - Mappers: entidade de domínio ↔ modelo de dados
 - Sync Service: coordena local ↔ remote
 
@@ -55,7 +56,7 @@ _Atualizado pelo Architect Agent. Consulte antes de qualquer decisão técnica._
 ```
 src/core/
   ui/           — design system, temas, widgets globais
-  network/      — cliente Supabase, interceptors
+  network/      — ApiClient (Dio), AuthSession, interceptors
   database/     — banco Drift, migrations locais
   auth/         — serviço de autenticação
   ai/           — cliente Claude API
@@ -94,7 +95,7 @@ src/features/
 | Result Type | Erros explícitos sem exceções não tratadas | CODING_STANDARDS.md |
 | Riverpod AsyncNotifier | State management para dados assíncronos | — |
 | Drift + migrations | SQLite local com versionamento | ADR-0005 |
-| RLS (Row Level Security) | Isolamento de dados por usuário no Supabase | ADR-0003 |
+| RLS (Row Level Security) | Isolamento de dados por usuário no Postgres, via role de baixo privilégio dedicada | ADR-0006 |
 | Optimistic UI | Atualiza local imediatamente, sincroniza depois | ADR-0005 |
 | Soft Delete | Registros marcados como deleted_at, nunca removidos fisicamente | — |
 
@@ -103,7 +104,7 @@ src/features/
 | Anti-padrão | Por quê proibido | ADR |
 |-------------|-----------------|-----|
 | Lógica de negócio em Widget | Viola Clean Architecture | ADR-0004 |
-| Acesso direto ao Supabase na Presentation | Viola separação de camadas | ADR-0004 |
+| Acesso direto ao `ApiClient`/`AuthSession` na Presentation (fora de providers dedicados como `currentUserIdProvider`) | Viola separação de camadas | ADR-0004 |
 | Singleton global mutable | Dificulta testes e sync | — |
 | Hard delete de dados financeiros | Requisito de auditoria + LGPD | — |
 | Secrets no código-fonte | Risco de segurança | — |
@@ -111,10 +112,10 @@ src/features/
 
 ## Modelo de Segurança
 
-- **Auth:** Supabase Auth com JWT; tokens renovados automaticamente
-- **RLS:** Todas as tabelas têm policies que filtram por `auth.uid()`
+- **Auth:** JWT próprio (access curto + refresh rotativo/revogável), emitido pelo backend após validar OAuth (Google/Apple)
+- **RLS:** Todas as tabelas de dados do usuário têm policies que filtram por `current_setting('app.current_user_id', true)::uuid`; a API roda com uma role Postgres de baixo privilégio dedicada (não a role dona das tabelas), senão o Postgres ignora RLS silenciosamente
 - **Dados locais:** SQLite não criptografado (dados em device seguro); sincronização via HTTPS
-- **Secrets:** Nunca no código — usar variáveis de ambiente ou Supabase Vault
+- **Secrets:** Nunca no código — variáveis de ambiente (`.env`, nunca commitado)
 - **LGPD:** Dados pessoais mínimos; direito ao esquecimento via `delete_account` procedure
 - **API IA:** Nunca enviar PII bruto para Claude API — sanitizar antes
 
@@ -123,8 +124,9 @@ src/features/
 ```
 Write:  Escreve local → marca como pending_sync → UI atualiza imediatamente
 Read:   Lê do local (sempre rápido)
-Sync:   Background worker → detecta pending_sync → envia para Supabase
-        → em sucesso: remove flag → em conflito: usa last-write-wins (a definir em ADR)
+Sync:   Push fire-and-forget → PUT/DELETE no backend próprio → em sucesso: marca
+        synced; em falha: reporta ao Sentry, tenta de novo na próxima escrita
+        (sem fila de retry dedicada ainda — ver limitações conhecidas em ADR-0006)
 ```
 
 ## Fluxo de Dados — Registro de Corrida
@@ -138,7 +140,7 @@ User input → TripPage widget
         → SyncQueue.add(trip.id) [async]
   → UI atualiza (optimistic)
   [background]
-  → SyncService → RemoteTripDataSource.upsert(trip) [Supabase]
+  → TripRepositoryImpl._doSync → ApiClient PUT /api/v1/trips/{id} [backend próprio]
   → SyncQueue.remove(trip.id)
 ```
 

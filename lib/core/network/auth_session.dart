@@ -6,8 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Guarda a sessão do backend próprio (access/refresh token + usuário) em
-/// armazenamento seguro do device, e notifica mudanças de estado de auth —
-/// substitui o que `Supabase.instance.client.auth` fazia automaticamente.
+/// armazenamento seguro do device, e notifica mudanças de estado de auth.
 class AuthSession {
   AuthSession({FlutterSecureStorage? storage})
       : _storage = storage ?? const FlutterSecureStorage();

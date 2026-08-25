@@ -44,7 +44,7 @@ Presentation → Domain ← Data
   (usa Use Cases)   (implementa Repository interfaces)
 ```
 
-- Domain **não importa** Flutter, Supabase, Drift, ou qualquer framework
+- Domain **não importa** Flutter, clientes de rede (Dio/ApiClient), Drift, ou qualquer framework
 - Presentation usa Domain via Use Cases e Providers (Riverpod)
 - Data implementa as interfaces de Domain
 
@@ -52,7 +52,7 @@ Presentation → Domain ← Data
 
 - **Testabilidade:** Domain layer sem dependências externas → testes unitários puros e rápidos
 - **Feature First:** Encontrar código de "corridas" é óbvio — `src/features/trips/` — sem navegar entre pastas `models/`, `controllers/`, etc. separadas
-- **Independência de framework:** Se Supabase mudar, apenas a camada `data/sources/remote/` muda; Domain permanece intacto
+- **Independência de framework:** Se o backend mudar, apenas a camada `data/` muda; Domain permanece intacto (validado na prática pela migração Supabase → backend próprio, ADR-0006)
 - **DDD:** Use Cases nomeados por ação de negócio (`AddTrip`, `GetMonthlySummary`) tornam o código auto-documentado
 - **Escalabilidade:** Features novas são adicionadas sem tocar código existente
 
@@ -68,7 +68,7 @@ Presentation → Domain ← Data
 ## Consequências
 
 ### Positivas
-- Testes unitários de Domain sem setup de flutter/supabase/drift
+- Testes unitários de Domain sem setup de flutter/rede/drift
 - Nova feature: criar pasta em `features/` sem modificar existentes (Open/Closed principle)
 - Onboarding: qualquer dev entende onde encontrar qualquer código
 
@@ -83,14 +83,14 @@ Presentation → Domain ← Data
 ## Conformidade
 
 O Review Agent verifica:
-- Domain layer não tem imports de `flutter/`, `supabase/`, `drift/`
+- Domain layer não tem imports de `flutter/`, clientes de rede, `drift/`
 - Toda operação de negócio tem Use Case dedicado
 - Providers (Riverpod) apenas delegam para Use Cases — não contêm lógica
 - Feature nova criada dentro de `src/features/[feature]/` seguindo a estrutura padrão
 
 ## ADRs Relacionados
 - ADR-0002: Flutter como UI (Presentation layer)
-- ADR-0003: Supabase como Data Source remoto
+- ADR-0006: backend próprio como Data Source remoto
 - ADR-0005: Offline First define como a camada Data é estruturada
 
 ## Originado por

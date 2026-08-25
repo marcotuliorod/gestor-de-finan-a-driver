@@ -1,7 +1,14 @@
 # Contratos de API — Driver Finance AI
 
 _Gerado pelo Architect Agent | 2026-06-26_
-_Supabase: REST auto-gerado + RPC Functions + Edge Functions + Auth_
+
+> **⚠️ Documento histórico/pré-implementação.** Escrito antes do Sprint 1, quando o
+> plano era usar Supabase (REST auto-gerado via Postgrest + RPC + Edge Functions).
+> O projeto migrou para um backend próprio em Python/FastAPI (ver `adr/ADR-0006`) —
+> os endpoints reais são REST convencionais (`PUT`/`DELETE /api/v1/{recurso}/{id}`,
+> não a sintaxe `?campo=eq.valor` do Postgrest abaixo). Para os contratos atuais,
+> consulte o código em `backend/app/resources/` e `backend/app/auth/router.py`
+> diretamente — são a fonte da verdade agora, não este documento.
 
 ---
 

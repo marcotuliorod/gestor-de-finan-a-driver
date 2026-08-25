@@ -1,6 +1,12 @@
 # Arquitetura Técnica — Driver Finance AI
 
-_Gerado pelo Architect Agent | 2026-06-26 | Ver também: ARCHITECTURE.md, ADR-0002 a ADR-0005_
+_Gerado pelo Architect Agent | 2026-06-26 | Ver também: ARCHITECTURE.md, ADR-0002 a ADR-0006_
+
+> **⚠️ Documento histórico/pré-implementação.** Escrito antes do Sprint 1, quando o
+> plano de backend era Supabase. O projeto migrou para backend próprio em
+> Python/FastAPI + Postgres self-hosted (ver `.ai/ARCHITECTURE.md` e `adr/ADR-0006`
+> para o estado atual real) — as menções a Supabase abaixo (SDK, Edge Functions,
+> Realtime, Vault) não se aplicam mais.
 
 ---
 

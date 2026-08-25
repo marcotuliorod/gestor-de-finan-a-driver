@@ -1,25 +1,27 @@
-# ADR-0005: Offline First com SQLite (Drift) + Sincronização Supabase
+# ADR-0005: Offline First com SQLite (Drift) + Sincronização com o backend próprio
 
 ## Status
-Accepted
+Accepted (atualizado em 2026-08-25 — ver nota abaixo)
 
 ## Data
 2026-06-26
+
+> **Atualização 2026-08-25 (ADR-0006):** o destino remoto da sincronização deixou de ser o Supabase e passou a ser o backend próprio (Python/FastAPI + Postgres self-hosted). O restante deste documento (modelo dual, fluxo de escrita/leitura, schema de sync) permanece válido conceitualmente, mas o comportamento **real implementado é mais simples** do que o descrito abaixo: não existe `SyncQueue`/retry com backoff em produção — cada escrita local dispara um push fire-and-forget único ao backend via `ApiClient`; falhas são reportadas ao Sentry (não silenciosamente descartadas) mas não são reenfileiradas automaticamente. Essa lacuna já existia com o Supabase e não foi resolvida na migração — ver ADR-0006, seção de riscos.
 
 ## Contexto
 
 O PRD exige tempo de resposta < 300ms para operações locais e funcionamento sem conexão. Motoristas frequentemente dirigem em áreas com conectividade instável ou usam o app enquanto dirigem (sem atenção para esperar loading). Os dados financeiros devem estar sempre disponíveis e nunca perdidos, mesmo sem internet.
 
-Ao mesmo tempo, os dados precisam ser sincronizados com o Supabase para backup na nuvem, acesso multi-dispositivo futuro, e o módulo de IA (que roda server-side via Edge Functions).
+Ao mesmo tempo, os dados precisam ser sincronizados com um backend remoto para backup na nuvem, acesso multi-dispositivo futuro, e o módulo de IA (que roda server-side).
 
 ## Decisão
 
-Adotamos uma estratégia **Offline First** com **SQLite local via Drift** como fonte de verdade primária, sincronização assíncrona em background com Supabase.
+Adotamos uma estratégia **Offline First** com **SQLite local via Drift** como fonte de verdade primária, sincronização assíncrona em background com o backend próprio.
 
 ### Modelo de Dados Dual
 
 - **Local (Drift/SQLite):** Espelho completo dos dados do usuário. Leitura e escrita sempre local.
-- **Remote (Supabase/PostgreSQL):** Destino de sincronização. Fonte de verdade para multi-dispositivo e backup.
+- **Remote (backend próprio/PostgreSQL):** Destino de sincronização. Fonte de verdade para multi-dispositivo e backup.
 
 ### Fluxo de Escrita
 
@@ -104,7 +106,7 @@ O Review Agent verifica:
 - Migrations Drift versionadas e reversíveis
 
 ## ADRs Relacionados
-- ADR-0003: Supabase como destino do sync remoto
+- ADR-0006: backend próprio (Python/FastAPI + Postgres) como destino do sync remoto, substituindo o Supabase de ADR-0003
 - ADR-0004: Repository pattern abstrai local vs remote
 
 ## Originado por

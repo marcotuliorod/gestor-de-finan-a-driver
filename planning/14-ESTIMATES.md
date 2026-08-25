@@ -131,7 +131,7 @@ _Base: 1 desenvolvedor + Claude Code | Velocidade: ~20 story points/sprint de 2 
 
 | Sprint | Story Points | Entregas |
 |--------|-------------|---------|
-| Sprint 0 (setup) | 0 pts | Infra, Supabase, CI/CD, projeto Flutter |
+| Sprint 0 (setup) | 0 pts | Infra, backend próprio, CI/CD, projeto Flutter |
 | Sprint 1 | 20 pts | E1 (Auth + Onboarding) + E2 (Cadastros) |
 | Sprint 2 | 20 pts | E3 (Trips) + E4 parcial (Combustível + Despesas básicas) |
 | Sprint 3 | 20 pts | E4 resto + E5 (Km) + E9 (Metas) + E7 básico + E10 |
@@ -150,5 +150,5 @@ _Base: 1 desenvolvedor + Claude Code | Velocidade: ~20 story points/sprint de 2 
 ## Notas sobre Estimativas
 
 - Points aumentados em 20% para épicos de alta complexidade (E7, E8) por risco de refactoring
-- Estimativas não incluem: design de telas (wireframes já prontos), configuração de Supabase (sprint 0), testes de usuário
+- Estimativas não incluem: design de telas (wireframes já prontos), configuração de infraestrutura (sprint 0), testes de usuário
 - Claude Code como co-desenvolvedor reduz estimativas em ~30% vs desenvolvimento solo tradicional

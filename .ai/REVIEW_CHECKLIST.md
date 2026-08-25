@@ -51,7 +51,7 @@ O Review Agent deve:
 - [ ] Novas dependências adicionadas ao PROJECT_CONTEXT.md
 - [ ] ADR criado se decisão arquitetural foi tomada
 - [ ] Widgets não contêm lógica de negócio
-- [ ] Domain layer não importa Flutter ou Supabase
+- [ ] Domain layer não importa Flutter ou clientes de rede (Dio/ApiClient)
 - [ ] Repositórios acessados apenas via interfaces (não implementações concretas)
 
 ## Seção 5: Testes

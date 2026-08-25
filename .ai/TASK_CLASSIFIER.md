@@ -50,8 +50,8 @@ _Usado pelo Complexity Analyzer Agent. Consulte antes de scorear qualquer tarefa
 | Score | Critério |
 |-------|---------|
 | **0** | Sem chamadas externas novas |
-| **1** | Chamada read-only a API documentada (Supabase REST simples) |
-| **2** | Operação de escrita, OAuth flow, ou Supabase Edge Function |
+| **1** | Chamada read-only a endpoint documentado do backend próprio |
+| **2** | Operação de escrita, OAuth flow, ou endpoint novo no backend próprio |
 | **3** | Webhook, realtime subscription, API não documentada, ou integração com plataforma externa |
 
 ### 5. IA / ML (0–3)
@@ -147,7 +147,7 @@ complexity:
   ui: 3           # gráficos, múltiplos componentes visuais complexos
   backend: 2      # cálculo de lucro por período, agrupamento por plataforma
   database: 1     # nova query agregada (view ou função)
-  apis: 1         # Supabase RPC para dados agregados
+  apis: 1         # endpoint FastAPI para dados agregados
   ai_ml: 0
   security: 1     # RLS nos dados do dashboard
   performance: 2  # < 300ms para carregar dashboard
@@ -165,7 +165,7 @@ complexity:
   ui: 3           # chat UI com bolhas, histórico, input com voz futura
   backend: 3      # orquestração: buscar dados do usuário, montar contexto, chamar API
   database: 2     # tabela de conversas, histórico, contexto persistido
-  apis: 2         # Supabase Edge Function + Claude API
+  apis: 2         # endpoint FastAPI (backend próprio) + Claude API
   ai_ml: 3        # RAG com dados do usuário, formatação de contexto, multi-turn
   security: 3     # sanitização antes de enviar para Claude, LGPD, dados financeiros
   performance: 2  # resposta IA < 3s, streaming preferível

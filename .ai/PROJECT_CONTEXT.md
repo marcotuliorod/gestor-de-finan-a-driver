@@ -1,7 +1,7 @@
 # Project Context
 
 _Documento vivo — atualizado pelo Documentation Agent ao final de cada ciclo._
-_Última atualização: 2026-08-25 | Fase: Implementation — Sprint 13 Completo + estabilização de CI Android. Próxima prioridade: migração Supabase → Postgres/FastAPI (Sprints 14-16, ver ADR-0006 planejado)._
+_Última atualização: 2026-08-25 | Fase: Implementation — migração Supabase → Postgres/FastAPI (Sprints 14-16) completa, ver `adr/ADR-0006`. Zero referências funcionais a Supabase restantes no código._
 
 ---
 
@@ -21,22 +21,23 @@ _Última atualização: 2026-08-25 | Fase: Implementation — Sprint 13 Completo
 | Camada | Tecnologia | Decisão |
 |--------|-----------|---------|
 | UI | Flutter (Dart) | ADR-0002 |
-| Backend | Supabase | ADR-0003 |
-| Banco de dados | PostgreSQL (Supabase) | ADR-0003 |
+| Backend | Python/FastAPI (self-hosted, `backend/`) | ADR-0006 |
+| Banco de dados | PostgreSQL self-hosted (Docker) | ADR-0006 |
 | Banco local | SQLite via Drift | ADR-0005 |
 | Armazenamento de estado | Riverpod v2 | — |
 | Arquitetura | Clean Architecture + DDD + Feature First | ADR-0004 |
 | Estratégia de dados | Offline First + Sync | ADR-0005 |
-| Auth | Supabase Auth (Google Sign-In) | — |
-| IA | Claude Haiku via Supabase Edge Function | — |
-| CI/CD | GitHub Actions (`flutter analyze --fatal-infos`) | — |
+| Auth | JWT próprio (Google/Apple Sign-In nativos) | ADR-0006 |
+| IA | Claude Haiku via endpoint FastAPI próprio (`/api/v1/ai/chat`) | ADR-0006 |
+| Infra de produção | Docker Compose + Caddy (HTTPS automático) | `docs/DEPLOY.md` |
+| CI/CD | GitHub Actions (`flutter analyze --fatal-infos` + `pytest`) | — |
 | Charts | fl_chart 0.68 | — |
 
 ## Estado Atual
 
 - **Fase:** Implementation
-- **Sprint atual:** Sprint 13 completo; **Sprint 14 (backend + auth) mergeado via PR #23**; **Sprint 15 (migração das 9 tabelas de dados) implementado nesta sessão**, ver abaixo — ainda não commitado/revisado em PR; Sprint 16 (AI chat + cleanup final do Supabase) pendente
-- **PRs mergeados:** #1 → #23 (todos com CI verde)
+- **Sprint atual:** Sprint 13 completo; migração Supabase → Postgres/FastAPI (Sprints 14-16) **completa** — ver seções abaixo. Backend próprio no ar (localmente validado), zero dependência de Supabase no código.
+- **PRs mergeados:** #1 → #25 (todos com CI verde)
 - **Features implementadas:** ver inventário abaixo
 - **Features pendentes:** ver backlog residual abaixo (reduzido a 2 itens — quase tudo do backlog original já foi entregue nos Sprints 9-13)
 
@@ -44,17 +45,31 @@ _Última atualização: 2026-08-25 | Fase: Implementation — Sprint 13 Completo
 
 `backend/` (FastAPI + asyncpg + PyJWT), `docker-compose.yml` + `.env.example` na raiz, migrations `0001-0003` (`users`, `refresh_tokens`, trigger), rotas `/api/v1/auth/{google,apple,refresh,logout,me,account}`. Flutter: `ApiClient`/`AuthSession` substituindo o Supabase Auth; Google Sign-In via `google_sign_in` nativo. Um bug de escopo de fixture (`asyncio_default_fixture_loop_scope`) só apareceu no CI, não localmente — corrigido em follow-up commit no mesmo PR.
 
-### Sprint 15 — Migração das 9 tabelas de dados (implementado, não commitado)
+### Sprint 15 — Migração das 9 tabelas de dados (mergeado, PR #24)
 
 Migrations `0004-0012`: `vehicles`, `platforms`, `trips`, `expenses`, `fuel_records`, `mileage_records`, `maintenance_records`, `goals` (schema idêntico ao `supabase/migrations/`, trocando `auth.users`/`auth.uid()` pela role/`current_setting` própria) + `0012_create_app_role.sql`. Routers em `backend/app/resources/` (um por recurso, `PUT /{id}` idempotente + `DELETE` para trips/expenses/maintenance). Os 9 pares `*_repository_impl.dart`/`*_provider.dart` do Flutter reescritos, trocando `SupabaseClient`/`.upsert()` por `ApiClient`/`PUT`; falhas de sync agora vão para o Sentry (`ApiClient.reportSyncFailure`) em vez de serem descartadas silenciosamente.
 
 **Achado de segurança importante durante a validação:** o teste de isolamento entre usuários (`test_rls_blocks_cross_user_delete`) revelou que a RLS estava **sendo ignorada** — a API conectava como a mesma role dona das tabelas, e o Postgres não aplica RLS ao dono/superuser independentemente das policies definidas. Corrigido criando uma role de baixo privilégio dedicada (`driver_finance_app`, migration `0012`) para o pool de runtime da API, mantendo a role original só para rodar migrations. Ver `app_database_url` vs `database_url` em `backend/app/core/config.py` e `APP_DB_PASSWORD` no `.env.example`/`docker-compose.yml`/CI. **Isso é o tipo de bug que só um teste de isolamento real pega — vale manter esse teste específico como guarda permanente contra regressão.**
 
-Validado localmente: 20/20 testes `pytest` (auth + 9 recursos, incluindo o teste de isolamento acima) contra Postgres real em container, e build da imagem Docker de produção bem-sucedido. `flutter analyze`/`flutter test` **não foram executados** — Flutter/Dart não estão disponíveis no ambiente onde este trabalho foi preparado — revisar/rodar antes de commitar/mergear.
+Validado: 20/20 testes `pytest` localmente + CI verde (`flutter analyze`, `pytest`, build do APK) no PR #24.
 
-`lib/core/network/supabase_client.dart` e o init condicional do Supabase em `main.dart` continuam **mantidos** — só o AI chat (Sprint 16) ainda usa `Supabase.instance.client` (via `functions.invoke('ai-chat', ...)`), então removê-los agora ainda quebraria essa feature.
+`lib/core/network/supabase_client.dart` e o init condicional do Supabase em `main.dart` foram **mantidos propositalmente até o Sprint 16** — só o AI chat ainda usava `Supabase.instance.client`, então removê-los antes quebraria essa feature. Removidos no Sprint 16 (ver abaixo).
 
-### Infra — Docker pronto para produção (implementado, não commitado)
+### Sprint 16 — AI chat + cleanup final do Supabase (completo)
+
+`backend/app/ai/router.py` — porta fiel de `supabase/functions/ai-chat/index.ts` (Deno→Python): mesma lógica de contexto financeiro do mês (trips/expenses/goals via `asyncpg`, com `authenticated_conn`/RLS), mesmo prompt em português, chama Anthropic via SDK oficial `anthropic` (`AsyncAnthropic`) com `ANTHROPIC_API_KEY` como env var do container. Uma correção deliberada em relação ao original: passou a filtrar `deleted_at IS NULL` nas queries de trips/expenses (a Edge Function original não filtrava, o que podia incluir registros soft-deleted no contexto financeiro da IA — bug pré-existente, corrigido durante a portagem).
+
+Flutter: `ai_chat_provider.dart` troca `Supabase.instance.client.functions.invoke('ai-chat', ...)` por `POST /api/v1/ai/chat` via `ApiClient`.
+
+**Cleanup final:** removida a dependência `supabase_flutter` do `pubspec.yaml`; apagado `supabase/` inteiro (migrations + Edge Function); deletado `lib/core/network/supabase_client.dart` e o init condicional em `main.dart`; criado `adr/ADR-0006` (supersede ADR-0003; ADR-0005 atualizado); atualizadas as referências a Supabase em `.ai/*` (ARCHITECTURE, PROMPT_LIBRARY, DECISIONS, KNOWLEDGE_BASE, REVIEW_CHECKLIST, TASK_CLASSIFIER, AGENTS), `planning/*`, `CLAUDE.md`, `.github/workflows/ci.yml` (removidos os dart-defines `SUPABASE_URL`/`SUPABASE_ANON_KEY`, mortos desde que o último consumidor saiu), `.gitignore`, `macos/Runner/AppDelegate.swift`.
+
+Documentos de planejamento pré-implementação com descrição técnica extensa do desenho original em Supabase (`planning/06-TECHNICAL_ARCHITECTURE.md`, `planning/09-API_CONTRACTS.md`) foram marcados com um aviso no topo como históricos/superseded (ver `adr/ADR-0006`), em vez de reescritos linha a linha — o código em `backend/` é a fonte da verdade agora.
+
+**Critério objetivo de "zero Supabase" verificado:** `grep -rlI "supabase" . --exclude-dir=.git -i` só retorna: `pubspec.lock` (regenerado automaticamente por `flutter pub get` no CI, não editado à mão), e documentos explicitamente históricos (`adr/ADR-0003` marcado Superseded, `docs/EXECUTIVE_REPORT_2026-06-26.md`, `tasks/TASK-20260626-sprint0-setup.md`, e menções factuais/históricas dentro de ADRs e `.ai/DECISIONS.md` que narram a decisão anterior).
+
+Validado: 23/23 testes `pytest` (20 anteriores + 3 novos de AI chat, incluindo teste de conteúdo real do prompt) contra Postgres real em container, build da imagem Docker de produção bem-sucedido. `flutter analyze`/`flutter test` **não foram executados neste ambiente** (Flutter/Dart indisponíveis) — validar via CI do PR antes de mergear.
+
+### Infra — Docker pronto para produção (mergeado, PR #25)
 
 Auditoria do `docker-compose.yml` (que só era usado para dev local) revelou vários gaps de produção: `postgres`/`api` publicavam porta direto no host (Postgres ficaria acessível publicamente num VPS sem firewall), sem HTTPS, sem `restart:` policy, sem limite de log, sem healthcheck na API, sem backup, sem runbook.
 
@@ -174,9 +189,9 @@ Core library desugaring, ajuste de versão do Flutter (3.35.7), `build-android` 
 | E5-US04 | Sugestão automática de odômetro | S | 2 | |
 | E2-US05 | Plataforma customizada | C | 2 | |
 
-## Próxima Prioridade: Migração Supabase → Postgres/FastAPI (Sprints 14-16)
+## Próxima Prioridade
 
-Decisão do usuário: remover toda referência ao Supabase do projeto, substituindo por Postgres puro self-hosted (Docker/VPS) + backend próprio em **Python/FastAPI**. Detalha o design, schema, faseamento e riscos no plano de implementação da sessão (backend FastAPI + asyncpg + JWT próprio + verificação Google/Apple via JWKS + RLS via `current_setting`). Um novo `adr/ADR-0006` será criado ao final do Sprint 16, superseding ADR-0003 e atualizando ADR-0005. Ver seção "Dependências Externas" abaixo, que muda de "Supabase" para "Postgres self-hosted + backend próprio" ao longo dessa migração.
+Migração Supabase → Postgres/FastAPI **concluída** (Sprints 14-16, ver `adr/ADR-0006`). Próximos passos são de infraestrutura real (fora do código — ver "Ações Pendentes do Usuário" abaixo) e o backlog residual de produto (E5-US04, E2-US05).
 
 ## ADRs Ativos
 
@@ -184,9 +199,10 @@ Decisão do usuário: remover toda referência ao Supabase do projeto, substitui
 |-----|--------|--------|
 | ADR-0001 | Adotar framework multi-agente | Accepted |
 | ADR-0002 | Flutter como plataforma UI | Accepted |
-| ADR-0003 | Supabase + PostgreSQL como backend | Accepted |
+| ADR-0003 | Supabase + PostgreSQL como backend | Superseded por ADR-0006 |
 | ADR-0004 | Clean Architecture + DDD + Feature First | Accepted |
-| ADR-0005 | Offline First com SQLite + sync Supabase | Accepted |
+| ADR-0005 | Offline First com SQLite + sync com backend próprio | Accepted (atualizado) |
+| ADR-0006 | Backend próprio (Python/FastAPI) + Postgres self-hosted | Accepted |
 
 ## Decisões Técnicas Tomadas na Implementação
 
@@ -204,19 +220,20 @@ Decisão do usuário: remover toda referência ao Supabase do projeto, substitui
 
 | Serviço | Uso | Status |
 |---------|-----|--------|
-| Supabase | Backend, Auth, DB, Edge Functions | Implementado (código) — **em migração para Postgres self-hosted + backend próprio Python/FastAPI, Sprints 14-16** |
-| Claude API (Anthropic) | Chat IA via Edge Function | Implementado (código) — migra para endpoint FastAPI no Sprint 16 (SDK oficial `anthropic` Python) |
-| Google Sign-In | Auth social | Implementado (código, via `signInWithOAuth` do Supabase) — migra para `google_sign_in` nativo no Sprint 14 |
+| Backend próprio (`backend/`, Python/FastAPI) | Auth, dados, IA — self-hosted via Docker | Implementado e validado localmente; falta deploy real (ver ações pendentes) |
+| Claude API (Anthropic) | Chat IA via endpoint FastAPI próprio (`/api/v1/ai/chat`) | Implementado (código); falta a chave real de produção |
+| Google Sign-In | Auth social, `google_sign_in` nativo | Implementado (código); falta client ID real de produção |
 | Apple Sign-In | Auth social (iOS) | Implementado (Sprint 10) |
-| Sentry | Monitoramento de erros | Pendente configuração |
+| Sentry | Monitoramento de erros (crashes app + falhas de sync) | Pendente configuração do DSN de produção |
 
 ## Ações Pendentes do Usuário (infraestrutura)
 
 | Ação | Prioridade |
 |------|------------|
-| Provisionar VPS + Docker para Postgres + backend FastAPI (Sprint 14) | Alta |
-| Configurar Google/Apple OAuth client IDs para o backend próprio (Sprint 14) | Alta |
-| Adicionar ANTHROPIC_API_KEY como env var do container `api` (Sprint 16) | Alta |
+| Provisionar VPS real e seguir `docs/DEPLOY.md` | Alta |
+| Registrar domínio real e trocar o placeholder `api.example.com` | Alta |
+| Configurar Google/Apple OAuth client IDs reais de produção | Alta |
+| Adicionar ANTHROPIC_API_KEY real como env var do container `api` | Alta |
 | Configurar Sentry DSN | Média |
 
 _Itens anteriores sobre provisionamento de projeto Supabase foram removidos — tornam-se obsoletos com a migração para backend próprio._
@@ -239,3 +256,7 @@ _Itens anteriores sobre provisionamento de projeto Supabase foram removidos — 
 | 2026-06-26 | Trip duration field + R$/hora nos Relatórios | Sprint 12 |
 | 2026-08-25 | Notificações locais (manutenção + meta) | Sprint 13 |
 | 2026-08-25 | Estabilização de CI/build Android (desugaring, versão Flutter, target macOS) | Pós Sprint 13 |
+| 2026-08-25 | Backend FastAPI próprio + auth (Google/Apple, JWT), substituindo Supabase Auth | Sprint 14 |
+| 2026-08-25 | Migração das 9 tabelas de dados para o backend próprio; achado e corrigido bug de RLS ignorada | Sprint 15 |
+| 2026-08-25 | Migração do AI chat + remoção total do Supabase do projeto (`adr/ADR-0006`) | Sprint 16 |
+| 2026-08-25 | Docker de produção: HTTPS via Caddy, backup, hardening, runbook (`docs/DEPLOY.md`) | Infra |

@@ -20,9 +20,9 @@ const _noAuthHeaderPaths = [
   '/api/v1/auth/logout',
 ];
 
-/// Cliente HTTP para o backend próprio (Python/FastAPI), substituindo o
-/// papel do `SupabaseClient` para auth: anexa o access token em toda
-/// requisição autenticada e renova automaticamente em caso de 401.
+/// Cliente HTTP para o backend próprio (Python/FastAPI): anexa o access
+/// token em toda requisição autenticada e renova automaticamente em caso
+/// de 401.
 class ApiClient {
   ApiClient({required AuthSession session, Dio? dio})
       : _session = session,

@@ -50,7 +50,7 @@ _Vazio — será preenchido com o padrão Either<Failure, T> estabelecido_
 
 ### 4. Padrões de Integração com APIs
 
-_Vazio — será preenchido quando Claude API e Supabase forem integrados_
+_Vazio — será preenchido com os padrões de integração com o backend próprio (FastAPI) e a Claude API_
 
 ---
 
@@ -74,7 +74,7 @@ _Vazio — será preenchido com factories, fixtures e padrões de mock_
 
 ### 8. Sincronização Offline / Sync
 
-_Vazio — será preenchido com a estratégia de sync local ↔ Supabase_
+_Vazio — será preenchido com a estratégia de sync local ↔ backend próprio_
 
 ---
 

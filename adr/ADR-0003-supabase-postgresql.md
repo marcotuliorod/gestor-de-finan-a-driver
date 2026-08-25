@@ -1,7 +1,7 @@
 # ADR-0003: Supabase + PostgreSQL como Backend
 
 ## Status
-Accepted
+**Superseded by ADR-0006** (2026-08-25) — o projeto migrou de Supabase para Postgres self-hosted + backend próprio em Python/FastAPI. Este documento é mantido como registro histórico da decisão original; não reflete mais a arquitetura atual.
 
 ## Data
 2026-06-26

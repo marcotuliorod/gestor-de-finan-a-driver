@@ -11,7 +11,7 @@ _Gerado pelo Planner Agent | 2026-06-26 | Priorizado por MoSCoW_
 ### E1-F1: Autenticação Social
 | ID | História | Critério de Aceite | MoSCoW | Pontos |
 |----|---------|-------------------|--------|--------|
-| E1-US01 | Como motorista, quero entrar com minha conta Google para não criar mais uma senha | Login com Google funciona; usuário criado no Supabase; sessão persiste | M | 3 |
+| E1-US01 | Como motorista, quero entrar com minha conta Google para não criar mais uma senha | Login com Google funciona; usuário criado no backend próprio; sessão persiste | M | 3 |
 | E1-US02 | Como motorista iOS, quero entrar com Apple ID | Login Apple funciona no iOS; cumpre requisito App Store | S | 3 |
 | E1-US03 | Como motorista, quero que minha sessão continue ativa sem precisar fazer login todo dia | Token renovado automaticamente; logout explícito disponível | M | 2 |
 | E1-US04 | Como motorista, quero poder deletar minha conta e todos os dados | Delete account remove todos os dados do banco (LGPD) | M | 3 |

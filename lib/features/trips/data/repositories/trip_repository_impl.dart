@@ -1,20 +1,22 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
+import 'package:driver_finance/core/utils/date_only.dart';
 import 'package:driver_finance/features/trips/domain/entities/trip.dart';
 import 'package:driver_finance/features/trips/domain/repositories/trip_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TripRepositoryImpl implements TripRepository {
   TripRepositoryImpl({
     required $db.AppDatabase database,
-    required SupabaseClient supabase,
+    required ApiClient apiClient,
   })  : _db = database,
-        _supabase = supabase;
+        _apiClient = apiClient;
 
   final $db.AppDatabase _db;
-  final SupabaseClient _supabase;
+  final ApiClient _apiClient;
 
   @override
   Stream<List<Trip>> watchByPeriod(DateTime start, DateTime end) {
@@ -52,7 +54,7 @@ class TripRepositoryImpl implements TripRepository {
               syncStatus: const Value('pending'),
             ),
           );
-      _syncToSupabase(trip.id);
+      _syncToBackend(trip.id);
       return right(trip);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -75,7 +77,7 @@ class TripRepositoryImpl implements TripRepository {
         updatedAt: Value(DateTime.now()),
         syncStatus: const Value('pending'),
       ));
-      _syncToSupabase(trip.id);
+      _syncToBackend(trip.id);
       return right(trip);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -91,14 +93,14 @@ class TripRepositoryImpl implements TripRepository {
         updatedAt: Value(DateTime.now()),
         syncStatus: const Value('pending'),
       ));
-      _syncDeleteToSupabase(tripId);
+      _syncDeleteToBackend(tripId);
       return right(unit);
     } catch (e) {
       return left(CacheFailure(e.toString()));
     }
   }
 
-  void _syncToSupabase(String tripId) {
+  void _syncToBackend(String tripId) {
     _doSync(tripId);
   }
 
@@ -109,9 +111,7 @@ class TripRepositoryImpl implements TripRepository {
           .getSingleOrNull();
       if (row == null) return;
 
-      await _supabase.from('trips').upsert({
-        'id': row.id,
-        'user_id': row.userId,
+      await _apiClient.dio.put<void>('/api/v1/trips/$tripId', data: {
         'platform_id': row.platformId,
         'gross_amount_cents': row.grossAmountCents,
         'bonus_amount_cents': row.bonusAmountCents,
@@ -119,9 +119,8 @@ class TripRepositoryImpl implements TripRepository {
         'promotion_cents': row.promotionCents,
         'cancellation_cents': row.cancellationCents,
         'duration_minutes': row.durationMinutes,
-        'trip_date': row.tripDate.toIso8601String(),
+        'trip_date': dateOnly(row.tripDate),
         'notes': row.notes,
-        'updated_at': row.updatedAt.toIso8601String(),
       });
 
       await (_db.update(_db.trips)..where((t) => t.id.equals(tripId)))
@@ -129,25 +128,20 @@ class TripRepositoryImpl implements TripRepository {
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),
       ));
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('trips', tripId, e);
     } catch (_) {}
   }
 
-  void _syncDeleteToSupabase(String tripId) {
+  void _syncDeleteToBackend(String tripId) {
     _doSyncDelete(tripId);
   }
 
   Future<void> _doSyncDelete(String tripId) async {
     try {
-      final row = await (_db.select(_db.trips)
-            ..where((t) => t.id.equals(tripId)))
-          .getSingleOrNull();
-      if (row == null || row.deletedAt == null) return;
-
-      await _supabase.from('trips').upsert({
-        'id': tripId,
-        'deleted_at': row.deletedAt!.toIso8601String(),
-        'updated_at': row.updatedAt.toIso8601String(),
-      });
+      await _apiClient.dio.delete<void>('/api/v1/trips/$tripId');
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('trips', tripId, e);
     } catch (_) {}
   }
 

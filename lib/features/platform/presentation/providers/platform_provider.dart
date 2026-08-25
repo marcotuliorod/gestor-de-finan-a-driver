@@ -1,5 +1,6 @@
 import 'package:driver_finance/core/database/app_database.dart';
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
 import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:driver_finance/features/platform/data/repositories/platform_repository_impl.dart';
 import 'package:driver_finance/features/platform/domain/entities/app_platform.dart';
@@ -8,12 +9,11 @@ import 'package:driver_finance/features/platform/domain/usecases/seed_default_pl
 import 'package:driver_finance/features/platform/domain/usecases/toggle_platform.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 final platformRepositoryProvider = Provider<PlatformRepository>((ref) {
   return PlatformRepositoryImpl(
     database: ref.watch(appDatabaseProvider),
-    supabase: Supabase.instance.client,
+    apiClient: ref.watch(apiClientProvider),
   );
 });
 

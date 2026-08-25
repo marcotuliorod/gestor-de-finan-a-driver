@@ -1,20 +1,22 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
+import 'package:driver_finance/core/utils/date_only.dart';
 import 'package:driver_finance/features/fuel/domain/entities/fuel_record.dart';
 import 'package:driver_finance/features/fuel/domain/repositories/fuel_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FuelRepositoryImpl implements FuelRepository {
   FuelRepositoryImpl({
     required $db.AppDatabase database,
-    required SupabaseClient supabase,
+    required ApiClient apiClient,
   })  : _db = database,
-        _supabase = supabase;
+        _apiClient = apiClient;
 
   final $db.AppDatabase _db;
-  final SupabaseClient _supabase;
+  final ApiClient _apiClient;
 
   @override
   Stream<List<FuelRecord>> watchAll() {
@@ -69,7 +71,7 @@ class FuelRepositoryImpl implements FuelRepository {
               ),
             );
       });
-      _syncToSupabase(record.id, record.expenseId);
+      _syncToBackend(record.id, record.expenseId);
       return right(record);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -94,7 +96,7 @@ class FuelRepositoryImpl implements FuelRepository {
     return totalKm / totalLiters;
   }
 
-  void _syncToSupabase(String fuelId, String expenseId) {
+  void _syncToBackend(String fuelId, String expenseId) {
     _doSync(fuelId, expenseId);
   }
 
@@ -108,21 +110,11 @@ class FuelRepositoryImpl implements FuelRepository {
           .getSingleOrNull();
       if (fuel == null || expense == null) return;
 
-      await _supabase.from('expenses').upsert({
-        'id': expense.id,
-        'user_id': expense.userId,
-        'vehicle_id': expense.vehicleId,
-        'category': 'fuel',
-        'amount_cents': expense.amountCents,
-        'expense_date': expense.expenseDate.toIso8601String(),
-        'is_recurring': false,
-        'updated_at': expense.updatedAt.toIso8601String(),
-      });
-      await _supabase.from('fuel_records').upsert({
-        'id': fuel.id,
-        'expense_id': fuel.expenseId,
-        'user_id': fuel.userId,
+      await _apiClient.dio.put<void>('/api/v1/fuel-records/$fuelId', data: {
+        'expense_id': expenseId,
         'vehicle_id': fuel.vehicleId,
+        'amount_cents': expense.amountCents,
+        'expense_date': dateOnly(expense.expenseDate),
         'liters': fuel.liters,
         'odometer': fuel.odometer,
         'fuel_type': fuel.fuelType,
@@ -133,6 +125,8 @@ class FuelRepositoryImpl implements FuelRepository {
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),
       ));
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('fuel_records', fuelId, e);
     } catch (_) {}
   }
 

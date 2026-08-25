@@ -1,5 +1,6 @@
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
 import 'package:driver_finance/core/utils/uuid_generator.dart';
 import 'package:driver_finance/features/fuel/data/repositories/fuel_repository_impl.dart';
 import 'package:driver_finance/features/fuel/domain/entities/fuel_record.dart';
@@ -7,12 +8,11 @@ import 'package:driver_finance/features/fuel/domain/repositories/fuel_repository
 import 'package:driver_finance/features/fuel/domain/usecases/add_fuel_record.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 final fuelRepositoryProvider = Provider<FuelRepository>((ref) {
   return FuelRepositoryImpl(
     database: ref.watch($db.appDatabaseProvider),
-    supabase: Supabase.instance.client,
+    apiClient: ref.watch(apiClientProvider),
   );
 });
 

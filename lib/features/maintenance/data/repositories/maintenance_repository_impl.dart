@@ -1,20 +1,22 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
+import 'package:driver_finance/core/utils/date_only.dart';
 import 'package:driver_finance/features/maintenance/domain/entities/maintenance_record.dart';
 import 'package:driver_finance/features/maintenance/domain/repositories/maintenance_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MaintenanceRepositoryImpl implements MaintenanceRepository {
   MaintenanceRepositoryImpl({
     required $db.AppDatabase database,
-    required SupabaseClient supabase,
+    required ApiClient apiClient,
   })  : _db = database,
-        _supabase = supabase;
+        _apiClient = apiClient;
 
   final $db.AppDatabase _db;
-  final SupabaseClient _supabase;
+  final ApiClient _apiClient;
 
   @override
   Stream<List<MaintenanceRecord>> watchAll() {
@@ -45,9 +47,10 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
               nextMaintenanceDate: Value(record.nextMaintenanceDate),
               createdAt: Value(now),
               updatedAt: Value(now),
+              syncStatus: const Value('pending'),
             ),
           );
-      _syncToSupabase(record.id);
+      _syncToBackend(record.id);
       return right(record);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -63,15 +66,17 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         $db.MaintenanceRecordsCompanion(
           deletedAt: Value(now),
           updatedAt: Value(now),
+          syncStatus: const Value('pending'),
         ),
       );
+      _syncDeleteToBackend(id);
       return right(null);
     } catch (e) {
       return left(CacheFailure(e.toString()));
     }
   }
 
-  void _syncToSupabase(String id) {
+  void _syncToBackend(String id) {
     _doSync(id);
   }
 
@@ -82,18 +87,17 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
           .getSingleOrNull();
       if (row == null) return;
 
-      await _supabase.from('maintenance_records').upsert({
-        'id': row.id,
-        'user_id': row.userId,
+      await _apiClient.dio.put<void>('/api/v1/maintenance-records/$id', data: {
         'vehicle_id': row.vehicleId,
         'type': row.type,
         'description': row.description,
         'cost_cents': row.costCents,
         'odometer': row.odometer,
-        'maintenance_date': row.maintenanceDate.toIso8601String(),
+        'maintenance_date': dateOnly(row.maintenanceDate),
         'next_maintenance_km': row.nextMaintenanceKm,
-        'next_maintenance_date': row.nextMaintenanceDate?.toIso8601String(),
-        'updated_at': row.updatedAt.toIso8601String(),
+        'next_maintenance_date': row.nextMaintenanceDate != null
+            ? dateOnly(row.nextMaintenanceDate!)
+            : null,
       });
 
       await (_db.update(_db.maintenanceRecords)..where((t) => t.id.equals(id)))
@@ -103,6 +107,20 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
           syncedAt: Value(DateTime.now()),
         ),
       );
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('maintenance_records', id, e);
+    } catch (_) {}
+  }
+
+  void _syncDeleteToBackend(String id) {
+    _doSyncDelete(id);
+  }
+
+  Future<void> _doSyncDelete(String id) async {
+    try {
+      await _apiClient.dio.delete<void>('/api/v1/maintenance-records/$id');
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('maintenance_records', id, e);
     } catch (_) {}
   }
 

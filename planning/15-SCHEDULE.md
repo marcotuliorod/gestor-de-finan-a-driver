@@ -193,14 +193,14 @@ Implementado com notificações locais (`flutter_local_notifications`), sem depe
 
 ## 🔄 Sprint 14-16 — Migração Supabase → Postgres self-hosted (Python/FastAPI)
 
-**Status:** EM PLANEJAMENTO — ver plano detalhado (`adr/ADR-0006` a ser criado no Sprint 16 encerra a migração)
+**Status:** Sprint 14 mergeado (PR #23); Sprint 15 implementado, aguardando PR; Sprint 16 pendente (`adr/ADR-0006` a ser criado nele encerra a migração)
 
 Decisão do usuário: remover toda dependência do Supabase (Auth, Postgrest, Edge Functions), substituindo por Postgres puro self-hosted (Docker/VPS) + backend próprio em Python/FastAPI.
 
 | Sprint | Escopo | Status |
 |--------|--------|--------|
-| Sprint 14 | Infra (Docker Compose Postgres+API) + backend FastAPI skeleton + Auth completo (Google/Apple/JWT próprio) | ⏳ |
-| Sprint 15 | Migração das 9 tabelas de dados (trips, expenses, fuel_records, vehicles, goals, platforms, maintenance_records, mileage_records) | ⏳ |
+| Sprint 14 | Infra (Docker Compose Postgres+API) + backend FastAPI skeleton + Auth completo (Google/Apple/JWT próprio) | ✅ (PR #23) |
+| Sprint 15 | Migração das 9 tabelas de dados (trips, expenses, fuel_records, vehicles, goals, platforms, maintenance_records, mileage_records) | ✅ implementado, aguardando PR |
 | Sprint 16 | Migração do AI chat (Edge Function → endpoint FastAPI) + remoção total de `supabase_flutter`/`supabase/` + atualização de ADRs e docs | ⏳ |
 
 Esta migração substitui as "Dependências Críticas" de Supabase listadas abaixo — elas deixam de bloquear o projeto, pois o backend próprio elimina a necessidade de provisionar um projeto Supabase.

@@ -35,18 +35,24 @@ _Última atualização: 2026-08-25 | Fase: Implementation — Sprint 13 Completo
 ## Estado Atual
 
 - **Fase:** Implementation
-- **Sprint atual:** Sprint 13 completo; **Sprint 14 implementado nesta sessão** (backend FastAPI + auth completo, ver abaixo) — ainda não commitado/revisado em PR; Sprints 15-16 pendentes
-- **PRs mergeados:** #1 → #22 (todos com CI verde)
+- **Sprint atual:** Sprint 13 completo; **Sprint 14 (backend + auth) mergeado via PR #23**; **Sprint 15 (migração das 9 tabelas de dados) implementado nesta sessão**, ver abaixo — ainda não commitado/revisado em PR; Sprint 16 (AI chat + cleanup final do Supabase) pendente
+- **PRs mergeados:** #1 → #23 (todos com CI verde)
 - **Features implementadas:** ver inventário abaixo
 - **Features pendentes:** ver backlog residual abaixo (reduzido a 2 itens — quase tudo do backlog original já foi entregue nos Sprints 9-13)
 
-### Sprint 14 — Backend FastAPI + Auth (implementado, não commitado)
+### Sprint 14 — Backend FastAPI + Auth (mergeado, PR #23)
 
-Criado `backend/` (FastAPI + asyncpg + PyJWT), `docker-compose.yml` + `.env.example` na raiz, migrations `0001-0003` (`users`, `refresh_tokens`, trigger), rotas `/api/v1/auth/{google,apple,refresh,logout,me,account}`. Validado localmente: 10/10 testes `pytest` passando (mock dos verificadores Google/Apple) contra Postgres real em container, e build da imagem Docker de produção (`docker compose build api`) bem-sucedido.
+`backend/` (FastAPI + asyncpg + PyJWT), `docker-compose.yml` + `.env.example` na raiz, migrations `0001-0003` (`users`, `refresh_tokens`, trigger), rotas `/api/v1/auth/{google,apple,refresh,logout,me,account}`. Flutter: `ApiClient`/`AuthSession` substituindo o Supabase Auth; Google Sign-In via `google_sign_in` nativo. Um bug de escopo de fixture (`asyncio_default_fixture_loop_scope`) só apareceu no CI, não localmente — corrigido em follow-up commit no mesmo PR.
 
-No Flutter: `lib/core/network/api_client.dart` (Dio + interceptor de refresh automático em 401) e `lib/core/network/auth_session.dart` (sessão local via `flutter_secure_storage`, substitui o que o Supabase Auth fazia); `auth_repository_impl.dart` e `auth_provider.dart` reescritos para o backend próprio (Google via `google_sign_in` nativo, não mais o fluxo de redirect do Supabase); corrigidas as 4 leituras diretas de `Supabase.instance.client.auth` fora da camada de auth. `flutter analyze`/`flutter test` **não foram executados** nesta sessão (Flutter/Dart não estão instalados no ambiente) — revisar/rodar antes de commitar.
+### Sprint 15 — Migração das 9 tabelas de dados (implementado, não commitado)
 
-Desvio deliberado do plano original: `lib/core/network/supabase_client.dart` e o init condicional do Supabase em `main.dart` foram **mantidos** (não deletados) — os 9 repositórios de dados (trips, expenses, etc.) ainda dependem deles até o Sprint 15, e apagá-los agora quebraria essas features, contrariando o próprio critério de pronto do Sprint 14.
+Migrations `0004-0012`: `vehicles`, `platforms`, `trips`, `expenses`, `fuel_records`, `mileage_records`, `maintenance_records`, `goals` (schema idêntico ao `supabase/migrations/`, trocando `auth.users`/`auth.uid()` pela role/`current_setting` própria) + `0012_create_app_role.sql`. Routers em `backend/app/resources/` (um por recurso, `PUT /{id}` idempotente + `DELETE` para trips/expenses/maintenance). Os 9 pares `*_repository_impl.dart`/`*_provider.dart` do Flutter reescritos, trocando `SupabaseClient`/`.upsert()` por `ApiClient`/`PUT`; falhas de sync agora vão para o Sentry (`ApiClient.reportSyncFailure`) em vez de serem descartadas silenciosamente.
+
+**Achado de segurança importante durante a validação:** o teste de isolamento entre usuários (`test_rls_blocks_cross_user_delete`) revelou que a RLS estava **sendo ignorada** — a API conectava como a mesma role dona das tabelas, e o Postgres não aplica RLS ao dono/superuser independentemente das policies definidas. Corrigido criando uma role de baixo privilégio dedicada (`driver_finance_app`, migration `0012`) para o pool de runtime da API, mantendo a role original só para rodar migrations. Ver `app_database_url` vs `database_url` em `backend/app/core/config.py` e `APP_DB_PASSWORD` no `.env.example`/`docker-compose.yml`/CI. **Isso é o tipo de bug que só um teste de isolamento real pega — vale manter esse teste específico como guarda permanente contra regressão.**
+
+Validado localmente: 20/20 testes `pytest` (auth + 9 recursos, incluindo o teste de isolamento acima) contra Postgres real em container, e build da imagem Docker de produção bem-sucedido. `flutter analyze`/`flutter test` **não foram executados** — Flutter/Dart não estão disponíveis no ambiente onde este trabalho foi preparado — revisar/rodar antes de commitar/mergear.
+
+`lib/core/network/supabase_client.dart` e o init condicional do Supabase em `main.dart` continuam **mantidos** — só o AI chat (Sprint 16) ainda usa `Supabase.instance.client` (via `functions.invoke('ai-chat', ...)`), então removê-los agora ainda quebraria essa feature.
 
 ## Proposta de Valor
 

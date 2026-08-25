@@ -21,7 +21,13 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      # Role admin/dona das tabelas — usada só para rodar as migrations.
       DATABASE_URL: postgresql://driver_finance:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/driver_finance
+      # Role de baixo privilégio usada pelo pool de runtime da API — é o
+      # que faz a RLS (isolamento por usuário) valer de verdade; ver
+      # backend/migrations/0012_create_app_role.sql.
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-dev-app-password-change-me}
+      APP_DATABASE_URL: postgresql://driver_finance_app:${APP_DB_PASSWORD:-dev-app-password-change-me}@postgres:5432/driver_finance
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-com.marcotuliorod.driverFinance}

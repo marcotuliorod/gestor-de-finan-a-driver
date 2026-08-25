@@ -2,6 +2,7 @@ import contextlib
 import os
 import sys
 from pathlib import Path
+from unittest.mock import AsyncMock, patch
 
 import asyncpg
 import pytest_asyncio
@@ -12,6 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 os.environ.setdefault(
     "DATABASE_URL",
     "postgresql://driver_finance:devpassword@localhost:5432/driver_finance_test",
+)
+os.environ.setdefault("APP_DB_PASSWORD", "app-test-password")
+os.environ.setdefault(
+    "APP_DATABASE_URL",
+    "postgresql://driver_finance_app:app-test-password@localhost:5432/driver_finance_test",
 )
 os.environ.setdefault("JWT_SECRET", "test-secret")
 os.environ.setdefault("GOOGLE_CLIENT_ID", "test-google-client-id")
@@ -53,3 +59,30 @@ async def client():
             AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
         )
         yield ac
+
+
+async def sign_in(client: AsyncClient, *, sub: str, email: str) -> dict:
+    """Signs a test user in via a mocked Google verifier and returns the
+    token pair response body — reused by resource tests that need an
+    authenticated user without re-testing the auth flow itself.
+    """
+    from app.auth.google_verifier import GoogleUserInfo
+
+    with patch(
+        "app.auth.router.verify_google_id_token",
+        new=AsyncMock(
+            return_value=GoogleUserInfo(sub=sub, email=email, name=None, picture=None)
+        ),
+    ):
+        response = await client.post("/api/v1/auth/google", json={"id_token": "fake"})
+    return response.json()
+
+
+@pytest_asyncio.fixture
+async def authed_client(client):
+    """`client` pre-authenticated as a single test user — the common case
+    for resource endpoint tests that aren't specifically about auth.
+    """
+    data = await sign_in(client, sub="resource-tests-sub", email="driver@example.com")
+    client.headers["Authorization"] = f"Bearer {data['access_token']}"
+    return client

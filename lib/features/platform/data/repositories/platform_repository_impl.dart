@@ -1,21 +1,22 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
 import 'package:driver_finance/core/utils/uuid_generator.dart';
 import 'package:driver_finance/features/platform/domain/entities/app_platform.dart';
 import 'package:driver_finance/features/platform/domain/repositories/platform_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PlatformRepositoryImpl implements PlatformRepository {
   PlatformRepositoryImpl({
     required $db.AppDatabase database,
-    required SupabaseClient supabase,
+    required ApiClient apiClient,
   })  : _db = database,
-        _supabase = supabase;
+        _apiClient = apiClient;
 
   final $db.AppDatabase _db;
-  final SupabaseClient _supabase;
+  final ApiClient _apiClient;
 
   @override
   Stream<List<AppPlatform>> watchPlatforms() {
@@ -61,7 +62,7 @@ class PlatformRepositoryImpl implements PlatformRepository {
               ),
             );
       }
-      _syncAllToSupabase(userId);
+      _syncAllToBackend();
       return right(unit);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -81,6 +82,7 @@ class PlatformRepositoryImpl implements PlatformRepository {
           syncStatus: const Value('pending'),
         ),
       );
+      _syncAllToBackend();
       return right(unit);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -107,31 +109,28 @@ class PlatformRepositoryImpl implements PlatformRepository {
               syncStatus: const Value('pending'),
             ),
           );
-      _doSyncAll(userId);
+      _syncAllToBackend();
       return right(unit);
     } catch (e) {
       return left(CacheFailure(e.toString()));
     }
   }
 
-  void _syncAllToSupabase(String userId) {
-    _doSyncAll(userId);
+  void _syncAllToBackend() {
+    _doSyncAll();
   }
 
-  Future<void> _doSyncAll(String userId) async {
-    try {
-      final rows = await (_db.select(_db.platforms)
-            ..where((t) => t.deletedAt.isNull()))
-          .get();
+  Future<void> _doSyncAll() async {
+    final rows = await (_db.select(_db.platforms)
+          ..where((t) => t.deletedAt.isNull()))
+        .get();
 
-      for (final row in rows) {
-        await _supabase.from('platforms').upsert({
-          'id': row.id,
-          'user_id': row.userId,
+    for (final row in rows) {
+      try {
+        await _apiClient.dio.put<void>('/api/v1/platforms/${row.id}', data: {
           'type': row.type,
           'custom_name': row.customName,
           'is_active': row.isActive,
-          'updated_at': row.updatedAt.toIso8601String(),
         });
 
         await (_db.update(_db.platforms)..where((t) => t.id.equals(row.id)))
@@ -139,9 +138,11 @@ class PlatformRepositoryImpl implements PlatformRepository {
           syncStatus: const Value('synced'),
           syncedAt: Value(DateTime.now()),
         ));
+      } on DioException catch (e) {
+        _apiClient.reportSyncFailure('platforms', row.id, e);
+      } catch (_) {
+        // Sync failure is silent — will retry via sync queue
       }
-    } catch (_) {
-      // Sync failure is silent — will retry via sync queue
     }
   }
 

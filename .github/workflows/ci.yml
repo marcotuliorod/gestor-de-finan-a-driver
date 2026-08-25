@@ -29,6 +29,8 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://driver_finance:devpassword@localhost:5432/driver_finance_test
+      APP_DB_PASSWORD: app-test-password
+      APP_DATABASE_URL: postgresql://driver_finance_app:app-test-password@localhost:5432/driver_finance_test
       JWT_SECRET: ci-test-secret
       GOOGLE_CLIENT_ID: ci-test-google-client-id
       APPLE_BUNDLE_ID: com.marcotuliorod.driver_finance

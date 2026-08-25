@@ -1,21 +1,23 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
+import 'package:driver_finance/core/utils/date_only.dart';
 import 'package:driver_finance/core/utils/uuid_generator.dart';
 import 'package:driver_finance/features/goals/domain/entities/financial_goal.dart';
 import 'package:driver_finance/features/goals/domain/repositories/goal_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GoalRepositoryImpl implements GoalRepository {
   GoalRepositoryImpl({
     required $db.AppDatabase database,
-    required SupabaseClient supabase,
+    required ApiClient apiClient,
   })  : _db = database,
-        _supabase = supabase;
+        _apiClient = apiClient;
 
   final $db.AppDatabase _db;
-  final SupabaseClient _supabase;
+  final ApiClient _apiClient;
 
   @override
   Stream<FinancialGoal?> watchCurrentGoal() {
@@ -73,7 +75,7 @@ class GoalRepositoryImpl implements GoalRepository {
             ),
           );
 
-      _syncToSupabase(id);
+      _syncToBackend(id);
 
       return right(FinancialGoal(
         id: id,
@@ -88,7 +90,7 @@ class GoalRepositoryImpl implements GoalRepository {
     }
   }
 
-  void _syncToSupabase(String goalId) {
+  void _syncToBackend(String goalId) {
     _doSync(goalId);
   }
 
@@ -99,14 +101,11 @@ class GoalRepositoryImpl implements GoalRepository {
           .getSingleOrNull();
       if (row == null) return;
 
-      await _supabase.from('goals').upsert({
-        'id': row.id,
-        'user_id': row.userId,
+      await _apiClient.dio.put<void>('/api/v1/goals/$goalId', data: {
         'monthly_target_cents': row.monthlyTargetCents,
         'working_days_per_month': row.workingDaysPerMonth,
-        'period_start': row.periodStart.toIso8601String(),
-        'period_end': row.periodEnd.toIso8601String(),
-        'updated_at': row.updatedAt.toIso8601String(),
+        'period_start': dateOnly(row.periodStart),
+        'period_end': dateOnly(row.periodEnd),
       });
 
       await (_db.update(_db.goals)..where((t) => t.id.equals(goalId))).write(
@@ -115,6 +114,8 @@ class GoalRepositoryImpl implements GoalRepository {
           syncedAt: Value(DateTime.now()),
         ),
       );
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('goals', goalId, e);
     } catch (_) {
       // Sync failure is silent — will retry via sync queue
     }

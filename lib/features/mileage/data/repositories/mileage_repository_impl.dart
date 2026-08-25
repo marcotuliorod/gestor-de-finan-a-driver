@@ -1,20 +1,22 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
+import 'package:driver_finance/core/utils/date_only.dart';
 import 'package:driver_finance/features/mileage/domain/entities/mileage_record.dart';
 import 'package:driver_finance/features/mileage/domain/repositories/mileage_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MileageRepositoryImpl implements MileageRepository {
   MileageRepositoryImpl({
     required $db.AppDatabase database,
-    required SupabaseClient supabase,
+    required ApiClient apiClient,
   })  : _db = database,
-        _supabase = supabase;
+        _apiClient = apiClient;
 
   final $db.AppDatabase _db;
-  final SupabaseClient _supabase;
+  final ApiClient _apiClient;
 
   @override
   Stream<List<MileageRecord>> watchByPeriod(
@@ -54,7 +56,7 @@ class MileageRepositoryImpl implements MileageRepository {
               syncStatus: const Value('pending'),
             ),
           );
-      _syncToSupabase(record.id);
+      _syncToBackend(record.id);
       return right(record);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -73,7 +75,7 @@ class MileageRepositoryImpl implements MileageRepository {
     return row?.endOdometer;
   }
 
-  void _syncToSupabase(String recordId) {
+  void _syncToBackend(String recordId) {
     _doSync(recordId);
   }
 
@@ -84,16 +86,14 @@ class MileageRepositoryImpl implements MileageRepository {
           .getSingleOrNull();
       if (row == null) return;
 
-      await _supabase.from('mileage_records').upsert({
-        'id': row.id,
-        'user_id': row.userId,
+      await _apiClient.dio
+          .put<void>('/api/v1/mileage-records/$recordId', data: {
         'vehicle_id': row.vehicleId,
         'start_odometer': row.startOdometer,
         'end_odometer': row.endOdometer,
         'work_km': row.workKm,
         'personal_km': row.personalKm,
-        'record_date': row.recordDate.toIso8601String(),
-        'updated_at': row.updatedAt.toIso8601String(),
+        'record_date': dateOnly(row.recordDate),
       });
 
       await (_db.update(_db.mileageRecords)
@@ -102,6 +102,8 @@ class MileageRepositoryImpl implements MileageRepository {
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),
       ));
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('mileage_records', recordId, e);
     } catch (_) {}
   }
 

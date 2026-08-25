@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:driver_finance/core/network/auth_session.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 const _apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
@@ -93,6 +96,22 @@ class ApiClient {
       await _session.clear();
       return false;
     }
+  }
+
+  /// Reporta uma falha de sincronização em background ao Sentry em vez de
+  /// descartá-la silenciosamente — os repositórios de dados chamam isto no
+  /// `catch` do push fire-and-forget para o backend (o registro local via
+  /// Drift já foi salvo com sucesso; só a sincronização remota falhou).
+  void reportSyncFailure(String resource, String id, Object error) {
+    unawaited(
+      Sentry.captureException(
+        error,
+        withScope: (scope) {
+          scope.setTag('sync_resource', resource);
+          scope.setTag('sync_record_id', id);
+        },
+      ),
+    );
   }
 }
 

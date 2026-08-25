@@ -1,20 +1,22 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
+import 'package:driver_finance/core/utils/date_only.dart';
 import 'package:driver_finance/features/expenses/domain/entities/expense.dart';
 import 'package:driver_finance/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ExpenseRepositoryImpl implements ExpenseRepository {
   ExpenseRepositoryImpl({
     required $db.AppDatabase database,
-    required SupabaseClient supabase,
+    required ApiClient apiClient,
   })  : _db = database,
-        _supabase = supabase;
+        _apiClient = apiClient;
 
   final $db.AppDatabase _db;
-  final SupabaseClient _supabase;
+  final ApiClient _apiClient;
 
   @override
   Stream<List<Expense>> watchByPeriod(DateTime start, DateTime end) {
@@ -51,7 +53,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
               syncStatus: const Value('pending'),
             ),
           );
-      _syncToSupabase(expense.id);
+      _syncToBackend(expense.id);
       return right(expense);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -67,13 +69,14 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         updatedAt: Value(DateTime.now()),
         syncStatus: const Value('pending'),
       ));
+      _syncDeleteToBackend(expenseId);
       return right(unit);
     } catch (e) {
       return left(CacheFailure(e.toString()));
     }
   }
 
-  void _syncToSupabase(String expenseId) {
+  void _syncToBackend(String expenseId) {
     _doSync(expenseId);
   }
 
@@ -84,17 +87,14 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
           .getSingleOrNull();
       if (row == null) return;
 
-      await _supabase.from('expenses').upsert({
-        'id': row.id,
-        'user_id': row.userId,
+      await _apiClient.dio.put<void>('/api/v1/expenses/$expenseId', data: {
         'vehicle_id': row.vehicleId,
         'category': row.category,
         'amount_cents': row.amountCents,
         'description': row.description,
-        'expense_date': row.expenseDate.toIso8601String(),
+        'expense_date': dateOnly(row.expenseDate),
         'is_recurring': row.isRecurring,
         'recurrence_type': row.recurrenceType,
-        'updated_at': row.updatedAt.toIso8601String(),
       });
 
       await (_db.update(_db.expenses)..where((t) => t.id.equals(expenseId)))
@@ -102,6 +102,20 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),
       ));
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('expenses', expenseId, e);
+    } catch (_) {}
+  }
+
+  void _syncDeleteToBackend(String expenseId) {
+    _doSyncDelete(expenseId);
+  }
+
+  Future<void> _doSyncDelete(String expenseId) async {
+    try {
+      await _apiClient.dio.delete<void>('/api/v1/expenses/$expenseId');
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('expenses', expenseId, e);
     } catch (_) {}
   }
 

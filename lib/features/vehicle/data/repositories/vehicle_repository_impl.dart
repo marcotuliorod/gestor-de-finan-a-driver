@@ -1,20 +1,21 @@
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:driver_finance/core/database/app_database.dart' as $db;
 import 'package:driver_finance/core/errors/failures.dart';
+import 'package:driver_finance/core/network/api_client.dart';
 import 'package:driver_finance/features/vehicle/domain/entities/vehicle.dart';
 import 'package:driver_finance/features/vehicle/domain/repositories/vehicle_repository.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class VehicleRepositoryImpl implements VehicleRepository {
   VehicleRepositoryImpl({
     required $db.AppDatabase database,
-    required SupabaseClient supabase,
+    required ApiClient apiClient,
   })  : _db = database,
-        _supabase = supabase;
+        _apiClient = apiClient;
 
   final $db.AppDatabase _db;
-  final SupabaseClient _supabase;
+  final ApiClient _apiClient;
 
   @override
   Stream<Vehicle?> watchVehicle() {
@@ -74,7 +75,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
               syncStatus: const Value('pending'),
             ),
           );
-      _syncToSupabase(vehicle.id);
+      _syncToBackend(vehicle.id);
       return right(vehicle);
     } catch (e) {
       return left(CacheFailure(e.toString()));
@@ -99,14 +100,14 @@ class VehicleRepositoryImpl implements VehicleRepository {
         updatedAt: Value(DateTime.now()),
         syncStatus: const Value('pending'),
       ));
-      _syncToSupabase(vehicle.id);
+      _syncToBackend(vehicle.id);
       return right(vehicle);
     } catch (e) {
       return left(CacheFailure(e.toString()));
     }
   }
 
-  void _syncToSupabase(String vehicleId) {
+  void _syncToBackend(String vehicleId) {
     _doSync(vehicleId);
   }
 
@@ -117,9 +118,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
           .getSingleOrNull();
       if (row == null) return;
 
-      await _supabase.from('vehicles').upsert({
-        'id': row.id,
-        'user_id': row.userId,
+      await _apiClient.dio.put<void>('/api/v1/vehicles/$vehicleId', data: {
         'make': row.make,
         'model': row.model,
         'year': row.year,
@@ -130,7 +129,6 @@ class VehicleRepositoryImpl implements VehicleRepository {
         'useful_life_months': row.usefulLifeMonths,
         'residual_value_pct': row.residualValuePct,
         'current_odometer': row.currentOdometer,
-        'updated_at': row.updatedAt.toIso8601String(),
       });
 
       await (_db.update(_db.vehicles)..where((t) => t.id.equals(vehicleId)))
@@ -138,6 +136,8 @@ class VehicleRepositoryImpl implements VehicleRepository {
         syncStatus: const Value('synced'),
         syncedAt: Value(DateTime.now()),
       ));
+    } on DioException catch (e) {
+      _apiClient.reportSyncFailure('vehicles', vehicleId, e);
     } catch (_) {
       // Sync failure is silent — will retry via sync queue
     }

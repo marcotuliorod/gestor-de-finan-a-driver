@@ -1,0 +1,46 @@
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Adiciona reverse proxy com HTTPS automático (Caddy) e o serviço de backup
+# do Postgres, sem publicar portas de postgres/api diretamente no host — só
+# a Caddy fica exposta (80/443). Ver docs/DEPLOY.md para o runbook completo.
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-api.example.com}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nunca sobe com `up` normal (profile isolado) — só via:
+  #   docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile backup run --rm backup
+  backup:
+    image: postgres:16
+    profiles: ["backup"]
+    depends_on:
+      - postgres
+    environment:
+      PGHOST: postgres
+      PGUSER: driver_finance
+      PGPASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      PGDATABASE: driver_finance
+    volumes:
+      - ./deploy/backup.sh:/backup.sh:ro
+      - backup_data:/backups
+    entrypoint: ["sh", "/backup.sh"]
+
+volumes:
+  caddy_data:
+  caddy_config:
+  backup_data:

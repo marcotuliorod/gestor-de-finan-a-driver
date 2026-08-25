@@ -1,12 +1,17 @@
 services:
   postgres:
     image: postgres:16
+    restart: unless-stopped
     environment:
       POSTGRES_USER: driver_finance
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
       POSTGRES_DB: driver_finance
-    ports:
-      - "5432:5432"
+    # Sem publicação de porta aqui de propósito — só o serviço `api` precisa
+    # alcançar o Postgres, e faz isso pela rede interna do compose (host
+    # `postgres`). Acesso administrativo (psql) deve ser via
+    # `docker compose exec postgres psql ...`, nunca expondo 5432 ao host.
+    # Dev local que queira `localhost:5432` direto ganha isso via
+    # docker-compose.override.yml (carregado automaticamente por `up` sem -f).
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,9 +19,15 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api:
     build: ./backend
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,9 +42,24 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-com.marcotuliorod.driverFinance}
+      # Wildcard é aceitável aqui: o único cliente é o app mobile (Flutter),
+      # que não envia cabeçalho Origin como um browser — CORS não é uma
+      # superfície de ataque real para uma API sem cliente web.
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
-    ports:
-      - "8000:8000"
+    # Sem publicação de porta aqui de propósito — em produção só a Caddy
+    # (docker-compose.prod.yml) deve falar com a API, pela rede interna do
+    # compose (host `api`). Dev local ganha `localhost:8000` via
+    # docker-compose.override.yml.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:

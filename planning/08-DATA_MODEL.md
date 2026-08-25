@@ -1,7 +1,7 @@
 # Modelo de Dados — Driver Finance AI
 
 _Gerado pelo Database Agent | 2026-06-26_
-_PostgreSQL (Supabase) + SQLite local (Drift)_
+_PostgreSQL (self-hosted, backend próprio) + SQLite local (Drift)_
 
 ---
 
@@ -15,7 +15,7 @@ _PostgreSQL (Supabase) + SQLite local (Drift)_
 
 ---
 
-## Schema PostgreSQL (Supabase)
+## Schema PostgreSQL (backend próprio, ver ADR-0006)
 
 ### Tabela: `vehicles`
 

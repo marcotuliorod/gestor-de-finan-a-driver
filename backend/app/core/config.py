@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     apple_bundle_id: str = ""
     cors_origins: str = "*"
+    anthropic_api_key: str = ""
 
 
 settings = Settings()

@@ -23,11 +23,7 @@ dependencies:
   path_provider: ^2.1.3
   path: ^1.9.0
 
-  # Supabase — único uso restante é o chat IA (Edge Function), migra no
-  # Sprint 16 e esta dependência sai do projeto (ver ADR-0006 planejado)
-  supabase_flutter: ^2.5.0
-
-  # Backend próprio (auth + dados), substituindo o Supabase — ver ADR-0006 planejado
+  # Backend próprio (auth + dados + IA) — ver ADR-0006
   dio: ^5.7.0
   flutter_secure_storage: ^9.2.2
 

@@ -42,6 +42,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-com.marcotuliorod.driverFinance}
+      # Chat IA (Claude Haiku) — nunca exposta ao Flutter, só usada aqui.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       # Wildcard é aceitável aqui: o único cliente é o app mobile (Flutter),
       # que não envia cabeçalho Origin como um browser — CORS não é uma
       # superfície de ataque real para uma API sem cliente web.

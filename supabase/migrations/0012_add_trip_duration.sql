@@ -1,1 +1,0 @@
-ALTER TABLE trips ADD COLUMN IF NOT EXISTS duration_minutes INTEGER;

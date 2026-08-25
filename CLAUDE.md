@@ -67,4 +67,4 @@ tests/             — suítes de teste
 
 ## Stack do Projeto
 
-Flutter + Supabase + PostgreSQL | Clean Architecture + DDD + Feature First | Offline First
+Flutter + Python/FastAPI + PostgreSQL (self-hosted) | Clean Architecture + DDD + Feature First | Offline First

@@ -55,6 +55,7 @@ Task: [TASK-ID] / Plan: [PLAN-ID] / [Outro contexto]
 |----|--------|--------|
 | [ADR-0001](ADR-0001-adopt-ai-multiagent-framework.md) | Adotar Framework Multi-Agente Baseado em Prompts | Accepted |
 | [ADR-0002](ADR-0002-flutter-cross-platform.md) | Flutter como Plataforma UI Cross-Platform | Accepted |
-| [ADR-0003](ADR-0003-supabase-postgresql.md) | Supabase + PostgreSQL como Backend | Accepted |
+| [ADR-0003](ADR-0003-supabase-postgresql.md) | Supabase + PostgreSQL como Backend | Superseded by ADR-0006 |
 | [ADR-0004](ADR-0004-clean-architecture-ddd-feature-first.md) | Clean Architecture + DDD + Feature First | Accepted |
-| [ADR-0005](ADR-0005-offline-first-sqlite-sync.md) | Offline First com SQLite (Drift) + Sync Supabase | Accepted |
+| [ADR-0005](ADR-0005-offline-first-sqlite-sync.md) | Offline First com SQLite (Drift) + Sync com backend próprio | Accepted |
+| [ADR-0006](ADR-0006-postgres-backend-proprio-python.md) | Backend próprio (Python/FastAPI) + Postgres self-hosted, substituindo Supabase | Accepted |

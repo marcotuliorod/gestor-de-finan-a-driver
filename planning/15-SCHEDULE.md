@@ -191,19 +191,21 @@ Implementado com notificações locais (`flutter_local_notifications`), sem depe
 
 ---
 
-## 🔄 Sprint 14-16 — Migração Supabase → Postgres self-hosted (Python/FastAPI)
+## ✅ Sprint 14-16 — Migração Supabase → Postgres self-hosted (Python/FastAPI)
 
-**Status:** Sprint 14 mergeado (PR #23); Sprint 15 implementado, aguardando PR; Sprint 16 pendente (`adr/ADR-0006` a ser criado nele encerra a migração)
+**Status:** Completa — `adr/ADR-0006` documenta a decisão (supersede ADR-0003), zero referências funcionais a Supabase restantes no código.
 
 Decisão do usuário: remover toda dependência do Supabase (Auth, Postgrest, Edge Functions), substituindo por Postgres puro self-hosted (Docker/VPS) + backend próprio em Python/FastAPI.
 
 | Sprint | Escopo | Status |
 |--------|--------|--------|
 | Sprint 14 | Infra (Docker Compose Postgres+API) + backend FastAPI skeleton + Auth completo (Google/Apple/JWT próprio) | ✅ (PR #23) |
-| Sprint 15 | Migração das 9 tabelas de dados (trips, expenses, fuel_records, vehicles, goals, platforms, maintenance_records, mileage_records) | ✅ implementado, aguardando PR |
-| Sprint 16 | Migração do AI chat (Edge Function → endpoint FastAPI) + remoção total de `supabase_flutter`/`supabase/` + atualização de ADRs e docs | ⏳ |
+| Sprint 15 | Migração das 9 tabelas de dados (trips, expenses, fuel_records, vehicles, goals, platforms, maintenance_records, mileage_records) | ✅ (PR #24) |
+| Sprint 16 | Migração do AI chat (Edge Function → endpoint FastAPI) + remoção total de `supabase_flutter`/`supabase/` + atualização de ADRs e docs | ✅ |
 
-Esta migração substitui as "Dependências Críticas" de Supabase listadas abaixo — elas deixam de bloquear o projeto, pois o backend próprio elimina a necessidade de provisionar um projeto Supabase.
+Infra de produção (Docker com HTTPS via Caddy, backup, hardening) entregue à parte, fora da numeração de sprints — ver `docs/DEPLOY.md`.
+
+Esta migração eliminou as antigas "Dependências Críticas" de Supabase — não bloqueiam mais o projeto, já que o backend próprio elimina a necessidade de provisionar um projeto Supabase.
 
 ---
 
@@ -226,9 +228,10 @@ Esta migração substitui as "Dependências Críticas" de Supabase listadas abai
 | Sprint 12 completo | 2026-06-26 | ✅ |
 | Sprint 13 completo | 2026-08-25 | ✅ |
 | Estabilização de CI Android | 2026-08-25 | ✅ |
-| Sprint 14 (backend + auth) | A definir | ⏳ |
-| Sprint 15 (dados) | A definir | ⏳ |
-| Sprint 16 (AI chat + cleanup Supabase) | A definir | ⏳ |
+| Sprint 14 (backend + auth) | 2026-08-25 | ✅ |
+| Sprint 15 (dados) | 2026-08-25 | ✅ |
+| Sprint 16 (AI chat + cleanup Supabase) | 2026-08-25 | ✅ |
+| Infra Docker produção (TLS, backup, hardening) | 2026-08-25 | ✅ |
 | **v1.0** | A definir | 🔄 |
 
 ---
@@ -237,5 +240,6 @@ Esta migração substitui as "Dependências Críticas" de Supabase listadas abai
 
 | Dependência | Bloqueia | Status |
 |------------|---------|--------|
-| Migração Supabase → Postgres/FastAPI (Sprints 14-16) | Elimina a dependência de provisionar Supabase | 🔄 Em planejamento |
-| ANTHROPIC_API_KEY no backend próprio (env var do container) | Chat IA | ⏳ Ação do usuário (Sprint 16) |
+| Provisionar VPS real + domínio + seguir `docs/DEPLOY.md` | Deploy em produção | ⏳ Ação do usuário |
+| Client IDs OAuth reais (Google/Apple) para o backend próprio | Login em produção | ⏳ Ação do usuário |
+| ANTHROPIC_API_KEY no backend próprio (env var do container) | Chat IA | ⏳ Ação do usuário |

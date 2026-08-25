@@ -22,9 +22,8 @@ final authStateProvider = StreamProvider<AppUser?>((ref) {
   return ref.watch(authRepositoryProvider).watchAuthState();
 });
 
-/// Id do usuário logado, reativo a login/logout — substitui as leituras
-/// diretas de `Supabase.instance.client.auth.currentUser?.id` que existiam
-/// fora da camada de auth.
+/// Id do usuário logado, reativo a login/logout — usar em vez de acessar
+/// `AuthSession`/`AuthRepository` diretamente fora da camada de auth.
 final currentUserIdProvider = Provider<String?>((ref) {
   return ref.watch(authStateProvider).valueOrNull?.id;
 });

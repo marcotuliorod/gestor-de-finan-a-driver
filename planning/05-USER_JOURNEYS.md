@@ -21,7 +21,7 @@ Carlos abre o app pela primeira vez
 ┌─────────────────────┐
 │  Google OAuth       │ ← popup nativo
 └─────────┬───────────┘
-          │ ← criado no Supabase, sessão iniciada
+          │ ← criado no backend próprio, sessão iniciada
           ▼
 ┌─────────────────────────────┐
 │  Onboarding — Passo 1/4     │
@@ -55,7 +55,7 @@ Carlos abre o app pela primeira vez
 
 **Pontos de Fricção a Evitar:**
 - Não forçar preenchimento de todos os campos no onboarding — permitir pular
-- Salvar localmente imediatamente; não esperar sync com Supabase para avançar
+- Salvar localmente imediatamente; não esperar sync remoto para avançar
 
 ---
 

@@ -39,7 +39,7 @@ _Gerado pelo Planner Agent | 2026-06-26_
 - [ ] Meta diária com progresso
 
 **Infraestrutura**
-- [ ] Supabase setup (auth + banco + RLS)
+- [ ] Backend próprio setup (auth + banco + RLS)
 - [ ] Offline First com SQLite Drift
 - [ ] CI/CD básico (GitHub Actions: lint + test + build)
 

@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.ai.router import router as ai_router
 from app.auth.router import router as auth_router
 from app.core.config import settings
 from app.core.db import create_pool
@@ -55,6 +56,7 @@ app.include_router(goals_router)
 app.include_router(platforms_router)
 app.include_router(mileage_router)
 app.include_router(maintenance_router)
+app.include_router(ai_router)
 
 
 @app.get("/health")

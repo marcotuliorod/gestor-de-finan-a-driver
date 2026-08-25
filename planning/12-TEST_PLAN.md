@@ -226,7 +226,7 @@ class MockSyncService extends Mock implements SyncService {}
 | Integration | Drift in-memory database (sem I/O) |
 | Golden | Dados fake determinísticos fixos |
 
-**Nunca:** Testes que acessam Supabase real ou Claude API — sempre mockar.
+**Nunca:** Testes que acessam o backend real ou a Claude API — sempre mockar.
 
 ---
 

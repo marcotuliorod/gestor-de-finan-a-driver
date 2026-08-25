@@ -13,7 +13,7 @@ _Gerado pelo Planner Agent | 2026-06-26_
 | R01 | Conflitos de sincronização offline causam perda de dados | 3 | 5 | 15 | 🔴 Alto |
 | R02 | Não conformidade com LGPD (dados pessoais) | 2 | 5 | 10 | 🟠 Médio |
 | R03 | IA responde com dados incorretos ou inventados | 3 | 4 | 12 | 🔴 Alto |
-| R04 | Limite de requests do Supabase free tier atingido | 3 | 3 | 9 | 🟠 Médio |
+| R04 | Limite de requests do backend próprio atingido (sem auto-scaling configurado) | 3 | 3 | 9 | 🟠 Médio |
 | R05 | Dados de diferentes usuários vazam via RLS incorreta | 2 | 5 | 10 | 🟠 Médio |
 | R06 | Cálculo de depreciação incorreto gera desconfiança | 3 | 3 | 9 | 🟠 Médio |
 | R07 | Onboarding com muitas etapas → abandono alto | 4 | 3 | 12 | 🔴 Alto |
@@ -22,7 +22,7 @@ _Gerado pelo Planner Agent | 2026-06-26_
 | R10 | Falha no Google Sign-In em dispositivos específicos | 2 | 4 | 8 | 🟠 Médio |
 | R11 | Drift migration quebra banco local em update do app | 2 | 4 | 8 | 🟠 Médio |
 | R12 | API key do Claude exposurada no cliente | 1 | 5 | 5 | 🟡 Baixo |
-| R13 | Supabase descontinua serviço ou muda preço drasticamente | 1 | 4 | 4 | 🟡 Baixo |
+| R13 | Provedor de VPS descontinua serviço ou muda preço drasticamente | 1 | 4 | 4 | 🟡 Baixo |
 
 ---
 
@@ -114,7 +114,7 @@ _Gerado pelo Planner Agent | 2026-06-26_
 - [ ] Consentimento explícito antes de coletar dados
 - [ ] Função `delete_user_account` testada e funcionando
 - [ ] Logs de acesso ao banco auditáveis
-- [ ] Criptografia em trânsito (HTTPS) e em repouso (Supabase default)
+- [ ] Criptografia em trânsito (HTTPS via Caddy) e em repouso (configurar no volume do Postgres)
 
 ### R05 — RLS Incorreta (Vazamento de Dados)
 
@@ -133,4 +133,4 @@ _Gerado pelo Planner Agent | 2026-06-26_
 | R03 (IA incorreta) | Feedback negativo no chat | A cada report |
 | R07 (onboarding) | Taxa de conclusão por etapa | Semanal |
 | R09 (registro) | DAU, registros por usuário ativo | Semanal |
-| R04 (limites Supabase) | Dashboard de uso Supabase | Semanal |
+| R04 (limites backend próprio) | Monitoramento de uso do VPS | Semanal |

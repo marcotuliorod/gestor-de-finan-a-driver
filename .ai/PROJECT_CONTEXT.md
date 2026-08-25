@@ -54,6 +54,16 @@ Validado localmente: 20/20 testes `pytest` (auth + 9 recursos, incluindo o teste
 
 `lib/core/network/supabase_client.dart` e o init condicional do Supabase em `main.dart` continuam **mantidos** — só o AI chat (Sprint 16) ainda usa `Supabase.instance.client` (via `functions.invoke('ai-chat', ...)`), então removê-los agora ainda quebraria essa feature.
 
+### Infra — Docker pronto para produção (implementado, não commitado)
+
+Auditoria do `docker-compose.yml` (que só era usado para dev local) revelou vários gaps de produção: `postgres`/`api` publicavam porta direto no host (Postgres ficaria acessível publicamente num VPS sem firewall), sem HTTPS, sem `restart:` policy, sem limite de log, sem healthcheck na API, sem backup, sem runbook.
+
+Corrigido com 3 arquivos compose: `docker-compose.yml` (base, agora "seguro por default" — sem porta pública em `postgres`/`api`, com `restart: unless-stopped`, `logging` limitado, healthcheck na API), `docker-compose.override.yml` (novo — carregado automaticamente só por `docker compose up` sem `-f`, republica as portas pra dev local, mantendo o fluxo já validado), `docker-compose.prod.yml` (novo — usado explicitamente em produção via `-f docker-compose.yml -f docker-compose.prod.yml`, adiciona Caddy para HTTPS automático via Let's Encrypt e um serviço `backup` sob profile, disparado por cron). `deploy/Caddyfile`, `deploy/backup.sh` e `docs/DEPLOY.md` (runbook completo de deploy) são novos. `backend/Dockerfile` passou a rodar como usuário não-root.
+
+Validado localmente de ponta a ponta: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build` sobe limpo (migrations `0001-0012` aplicadas, API healthy, Caddy tenta emitir certificado real para o domínio placeholder e falha graciosamente como esperado — `api.example.com` é bloqueado pela política do Let's Encrypt), `postgres`/`api` confirmadamente sem porta pública (`docker compose port` vazio), e o serviço de backup gera um dump `.sql.gz` válido via `--profile backup run --rm backup`.
+
+**Decisões deliberadas, documentadas como fora de escopo:** sem domínio real ainda (`api.example.com` como placeholder, trocar em produção), sem upload de backup pra storage externo (só local no VPS — perda total do VPS perde o backup junto), sem CI/CD automatizado de deploy (runbook documenta `git pull` + `up -d --build` manual via SSH).
+
 ## Proposta de Valor
 
 > Motoristas sabem quanto recebem das plataformas, mas não sabem quanto realmente lucram.

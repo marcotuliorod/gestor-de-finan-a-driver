@@ -1,0 +1,14 @@
+# Carregado automaticamente pelo `docker compose up` quando nenhum -f é
+# passado (comportamento padrão do Compose) — só conveniência de dev local:
+# publica as portas para acesso direto via localhost, sem precisar de
+# domínio/Caddy. Em produção, use explicitamente:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# (passar -f desativa o auto-load deste arquivo, então nada aqui vaza para produção).
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  api:
+    ports:
+      - "8000:8000"

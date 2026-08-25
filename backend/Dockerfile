@@ -9,13 +9,17 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 FROM python:3.12-slim
 
+RUN useradd --create-home --shell /usr/sbin/nologin appuser
+
 WORKDIR /app
-COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder --chown=appuser:appuser /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY app app
-COPY migrations migrations
-COPY tool tool
+COPY --chown=appuser:appuser app app
+COPY --chown=appuser:appuser migrations migrations
+COPY --chown=appuser:appuser tool tool
+
+USER appuser
 
 EXPOSE 8000
 

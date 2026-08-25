@@ -1,0 +1,7 @@
+# Troque DOMAIN no .env do VPS para o domínio real antes de subir em
+# produção — api.example.com é só um placeholder e nunca vai emitir
+# certificado de verdade (Let's Encrypt precisa resolver o domínio pro IP
+# do VPS via DNS antes de validar).
+{$DOMAIN:api.example.com} {
+	reverse_proxy api:8000
+}

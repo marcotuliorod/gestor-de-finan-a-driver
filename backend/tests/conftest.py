@@ -20,14 +20,21 @@ os.environ.setdefault("APPLE_BUNDLE_ID", "com.marcotuliorod.driver_finance")
 from tool.migrate import run as run_migrations  # noqa: E402
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def _migrate_db():
+    # Function-scoped (not session) so its event loop scope matches
+    # `asyncio_default_fixture_loop_scope = "function"` in pyproject.toml.
+    # Re-running is cheap: tool/migrate.py tracks applied migrations in
+    # schema_migrations and no-ops once they're already applied.
     await run_migrations()
     yield
 
 
 @pytest_asyncio.fixture(autouse=True)
-async def _clean_tables():
+async def _clean_tables(_migrate_db):
+    # Explicit dependency on _migrate_db so pytest guarantees migrations
+    # run first — two same-scope autouse fixtures have no ordering
+    # guarantee otherwise.
     conn = await asyncpg.connect(os.environ["DATABASE_URL"])
     try:
         await conn.execute("TRUNCATE refresh_tokens, users CASCADE")

@@ -8,6 +8,12 @@ import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+/// Client ID OAuth "Web" do Google Cloud Console — precisa bater com
+/// GOOGLE_CLIENT_ID no backend (`backend/app/core/config.py`), que valida o
+/// `aud` do id_token contra esse mesmo valor. Sem isso, o backend rejeita
+/// todo login Google com "Wrong audience" mesmo com um token válido.
+const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
+
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required ApiClient apiClient,
@@ -15,7 +21,12 @@ class AuthRepositoryImpl implements AuthRepository {
     GoogleSignIn? googleSignIn,
   })  : _apiClient = apiClient,
         _session = session,
-        _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: const ['email']);
+        _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              scopes: const ['email'],
+              serverClientId:
+                  _googleServerClientId.isEmpty ? null : _googleServerClientId,
+            );
 
   final ApiClient _apiClient;
   final AuthSession _session;

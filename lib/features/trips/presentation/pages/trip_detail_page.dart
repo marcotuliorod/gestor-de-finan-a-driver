@@ -96,11 +96,11 @@ class TripDetailPage extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         color: AppColors.dfaRaised,
-                        border: Border(
-                          top: const BorderSide(color: AppColors.dfaLine),
-                          right: const BorderSide(color: AppColors.dfaLine),
-                          bottom: const BorderSide(color: AppColors.dfaLine),
-                          left: const BorderSide(
+                        border: const Border(
+                          top: BorderSide(color: AppColors.dfaLine),
+                          right: BorderSide(color: AppColors.dfaLine),
+                          bottom: BorderSide(color: AppColors.dfaLine),
+                          left: BorderSide(
                               color: AppColors.dfaGreen, width: 2),
                         ),
                         borderRadius: BorderRadius.circular(8),

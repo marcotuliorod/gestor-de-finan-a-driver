@@ -676,8 +676,8 @@ class _VehicleTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           clipBehavior: Clip.hardEdge,
-          child: Column(
-            children: const [
+          child: const Column(
+            children: [
               _MaintRow('Front brake pads & rotors', 'DUE IN ~1,200 MI · EST OCT 4',
                   r'$310', AppColors.dfaRed, false),
               _MaintRow('Synthetic oil change', 'DUE IN ~2,600 MI · EST OCT 21',

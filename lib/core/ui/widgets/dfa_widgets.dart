@@ -54,7 +54,7 @@ class DfaHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 6, 18, 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: const BorderSide(color: AppColors.dfaLine2, width: 1)),
+        border: Border(bottom: BorderSide(color: AppColors.dfaLine2, width: 1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,

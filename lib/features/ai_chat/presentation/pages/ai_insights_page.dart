@@ -132,7 +132,7 @@ class _ChatInputBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        border: Border(top: const BorderSide(color: AppColors.dfaLine)),
+        border: Border(top: BorderSide(color: AppColors.dfaLine)),
         color: AppColors.dfaSurface,
       ),
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),

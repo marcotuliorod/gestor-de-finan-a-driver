@@ -112,11 +112,11 @@ class _SetAsideTab extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: AppColors.dfaRaised,
-            border: Border(
-              top: const BorderSide(color: AppColors.dfaLine),
-              right: const BorderSide(color: AppColors.dfaLine),
-              bottom: const BorderSide(color: AppColors.dfaLine),
-              left: const BorderSide(color: AppColors.dfaAmber, width: 2),
+            border: const Border(
+              top: BorderSide(color: AppColors.dfaLine),
+              right: BorderSide(color: AppColors.dfaLine),
+              bottom: BorderSide(color: AppColors.dfaLine),
+              left: BorderSide(color: AppColors.dfaAmber, width: 2),
             ),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -322,8 +322,8 @@ class _QuarterlyTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           clipBehavior: Clip.hardEdge,
-          child: Column(
-            children: const [
+          child: const Column(
+            children: [
               _QRow('Q1 2026', 'JAN–MAR · PAID APR 15', r'$1,105', 'PAID',
                   Color(0xFF12261A), AppColors.dfaGreen2, false),
               _QRow('Q2 2026', 'APR–JUN · PAID JUN 16', r'$1,240', 'PAID',
@@ -492,8 +492,8 @@ class _ReconcileTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           clipBehavior: Clip.hardEdge,
-          child: Column(
-            children: const [
+          child: const Column(
+            children: [
               _RecRow('UBER', 'SEP 16', r'EXP $742.10 · GOT $742.10',
                   r'$0.00', null, 'MATCH', Color(0xFF12261A),
                   AppColors.dfaGreen2, false),
@@ -518,11 +518,11 @@ class _ReconcileTab extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: AppColors.dfaRaised,
-            border: Border(
-              top: const BorderSide(color: AppColors.dfaLine),
-              right: const BorderSide(color: AppColors.dfaLine),
-              bottom: const BorderSide(color: AppColors.dfaLine),
-              left: const BorderSide(color: AppColors.dfaRed, width: 2),
+            border: const Border(
+              top: BorderSide(color: AppColors.dfaLine),
+              right: BorderSide(color: AppColors.dfaLine),
+              bottom: BorderSide(color: AppColors.dfaLine),
+              left: BorderSide(color: AppColors.dfaRed, width: 2),
             ),
             borderRadius: BorderRadius.circular(8),
           ),

@@ -1,19 +1,24 @@
 import 'package:driver_finance/core/providers/shared_preferences_provider.dart';
 import 'package:driver_finance/core/ui/components/app_shell.dart';
 import 'package:driver_finance/features/ai_chat/presentation/pages/ai_chat_page.dart';
+import 'package:driver_finance/features/ai_chat/presentation/pages/ai_insights_page.dart';
 import 'package:driver_finance/features/ai_chat/presentation/pages/conversation_list_page.dart';
 import 'package:driver_finance/features/auth/presentation/pages/login_page.dart';
 import 'package:driver_finance/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:driver_finance/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:driver_finance/features/expenses/presentation/pages/expense_list_page.dart';
+import 'package:driver_finance/features/forecast/presentation/pages/forecast_page.dart';
 import 'package:driver_finance/features/fuel/presentation/pages/fuel_form_page.dart';
 import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_form_page.dart';
 import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_list_page.dart';
 import 'package:driver_finance/features/mileage/presentation/pages/mileage_form_page.dart';
+import 'package:driver_finance/features/money/presentation/pages/money_page.dart';
 import 'package:driver_finance/features/platform/presentation/pages/platform_selection_page.dart';
 import 'package:driver_finance/features/reports/presentation/pages/reports_page.dart';
 import 'package:driver_finance/features/settings/presentation/pages/settings_page.dart';
+import 'package:driver_finance/features/tax/presentation/pages/tax_page.dart';
+import 'package:driver_finance/features/trips/presentation/pages/trip_detail_page.dart';
 import 'package:driver_finance/features/trips/presentation/pages/trip_form_page.dart';
 import 'package:driver_finance/features/trips/presentation/pages/trip_list_page.dart';
 import 'package:driver_finance/features/vehicle/presentation/pages/vehicle_form_page.dart';
@@ -100,16 +105,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const TripListPage(),
           ),
           GoRoute(
+            path: '/app/trips/detail',
+            builder: (context, state) => const TripDetailPage(),
+          ),
+          GoRoute(
+            path: '/app/money',
+            builder: (context, state) => const MoneyPage(),
+          ),
+          GoRoute(
+            path: '/app/tax',
+            builder: (context, state) => const TaxPage(),
+          ),
+          GoRoute(
+            path: '/app/forecast',
+            builder: (context, state) => const ForecastPage(),
+          ),
+          GoRoute(
+            path: '/app/ai',
+            builder: (context, state) => const AiInsightsPage(),
+          ),
+          GoRoute(
             path: '/app/expenses',
             builder: (context, state) => const ExpenseListPage(),
           ),
           GoRoute(
             path: '/app/reports',
             builder: (context, state) => const ReportsPage(),
-          ),
-          GoRoute(
-            path: '/app/ai',
-            builder: (context, state) => const ConversationListPage(),
           ),
           GoRoute(
             path: '/app/settings',

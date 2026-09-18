@@ -53,6 +53,9 @@ dependencies:
   # Observability
   sentry_flutter: ^8.1.0
 
+  # Fonts
+  google_fonts: ^6.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

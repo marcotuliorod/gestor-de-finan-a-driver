@@ -1,274 +1,53 @@
-import 'dart:async';
-
-import 'package:driver_finance/core/notifications/goal_notification_service.dart';
-import 'package:driver_finance/core/notifications/maintenance_alert_scheduler.dart';
 import 'package:driver_finance/core/ui/theme/app_colors.dart';
-import 'package:driver_finance/core/utils/currency_formatter.dart';
-import 'package:driver_finance/features/dashboard/domain/entities/daily_revenue.dart';
-import 'package:driver_finance/features/dashboard/domain/entities/dashboard_summary.dart';
-import 'package:driver_finance/features/dashboard/presentation/providers/dashboard_provider.dart';
-import 'package:driver_finance/features/expenses/presentation/pages/expense_form_page.dart';
-import 'package:driver_finance/features/fuel/presentation/pages/fuel_form_page.dart';
-import 'package:driver_finance/features/maintenance/domain/entities/maintenance_record.dart';
-import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_form_page.dart';
-import 'package:driver_finance/features/maintenance/presentation/pages/maintenance_list_page.dart';
-import 'package:driver_finance/features/maintenance/presentation/providers/maintenance_provider.dart';
-import 'package:driver_finance/features/trips/presentation/pages/trip_form_page.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:driver_finance/core/ui/widgets/dfa_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-enum _Period { today, thisWeek, thisMonth }
-
-extension on _Period {
-  String get label => switch (this) {
-        _Period.today => 'Hoje',
-        _Period.thisWeek => 'Semana',
-        _Period.thisMonth => 'Mês',
-      };
-
-  (DateTime, DateTime) get range {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
-    return switch (this) {
-      _Period.today => (today, endOfDay),
-      _Period.thisWeek => (
-          today.subtract(Duration(days: today.weekday - 1)),
-          endOfDay,
-        ),
-      _Period.thisMonth => (
-          DateTime(now.year, now.month),
-          endOfDay,
-        ),
-    };
-  }
-}
-
-class DashboardPage extends ConsumerStatefulWidget {
+class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   @override
-  ConsumerState<DashboardPage> createState() => _DashboardPageState();
-}
-
-class _DashboardPageState extends ConsumerState<DashboardPage> {
-  _Period _period = _Period.thisMonth;
-
-  @override
   Widget build(BuildContext context) {
-    final range = _period.range;
-    final summary = ref.watch(dashboardSummaryProvider(range));
-
-    ref.listen<AsyncValue<List<MaintenanceRecord>>>(
-      watchMaintenanceProvider,
-      (prev, next) {
-        if (prev == null) return;
-        final records = next.valueOrNull;
-        if (records != null) {
-          unawaited(MaintenanceAlertScheduler.rescheduleAll(records));
-        }
-      },
-    );
-
-    ref.listen<DashboardSummary?>(
-      dashboardSummaryProvider(range),
-      (prev, next) {
-        if (prev == null) return;
-        final wasNotMet = (prev.goalProgress ?? 0) < 1.0;
-        final isNowMet = (next?.goalProgress ?? 0) >= 1.0;
-        if (wasNotMet && isNowMet) {
-          unawaited(GoalNotificationService.notifyGoalReached());
-        }
-      },
-    );
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
-      body: summary == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                const _MaintenanceAlertCard(),
-                _PeriodSelector(
-                  selected: _period,
-                  onChanged: (p) => setState(() => _period = p),
-                ),
-                const SizedBox(height: 16),
-                _KpiRow(summary: summary),
-                const SizedBox(height: 16),
-                if (summary.monthlyGoalCents != null) ...[
-                  _GoalCard(summary: summary),
-                  const SizedBox(height: 16),
-                ],
-                _ExpenseBreakdown(summary: summary),
-                const SizedBox(height: 16),
-                _DailyRevenueChart(dailyRevenues: summary.dailyRevenues),
-                if (summary.dailyRevenues.isNotEmpty)
-                  const SizedBox(height: 16),
-                const _QuickActions(),
-              ],
-            ),
-    );
-  }
-}
-
-class _MaintenanceAlertCard extends ConsumerWidget {
-  const _MaintenanceAlertCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final records = ref.watch(watchMaintenanceProvider).valueOrNull ?? [];
-    final now = DateTime.now();
-    final threshold = now.add(const Duration(days: 7));
-    final alerts = records.where((r) {
-      if (r.nextMaintenanceDate != null &&
-          !r.nextMaintenanceDate!.isAfter(threshold)) {
-        return true;
-      }
-      return false;
-    }).toList();
-
-    if (alerts.isEmpty) return const SizedBox.shrink();
-
-    final overdue = alerts
-        .where((r) =>
-            r.nextMaintenanceDate != null &&
-            r.nextMaintenanceDate!.isBefore(now))
-        .length;
-    final label = overdue > 0
-        ? '$overdue manutenção(ões) em atraso'
-        : '${alerts.length} manutenção(ões) próxima(s)';
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        color: AppColors.warning.withValues(alpha: 0.12),
-        child: ListTile(
-          leading: Icon(
-            Icons.warning_amber_rounded,
-            color: overdue > 0 ? AppColors.expense : AppColors.warning,
-          ),
-          title: Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: overdue > 0 ? AppColors.expense : AppColors.warning,
-            ),
-          ),
-          subtitle: const Text('Toque para ver detalhes'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const MaintenanceListPage(),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DailyRevenueChart extends StatelessWidget {
-  const _DailyRevenueChart({required this.dailyRevenues});
-
-  final List<DailyRevenue> dailyRevenues;
-
-  @override
-  Widget build(BuildContext context) {
-    if (dailyRevenues.isEmpty) return const SizedBox.shrink();
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 16, 16, 8),
+      backgroundColor: AppColors.dfaBg,
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Text(
-                'Receita por dia',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
+            const DfaStatusBar(),
+            const DfaHeader(
+              kicker: 'MARCUS R · CAMRY LE',
+              title: 'Overview',
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 140,
-              child: BarChart(
-                BarChartData(
-                  barGroups: dailyRevenues.asMap().entries.map((entry) {
-                    final i = entry.key;
-                    final d = entry.value;
-                    return BarChartGroupData(
-                      x: i,
-                      barRods: [
-                        BarChartRodData(
-                          toY: d.amountCents / 100,
-                          color: AppColors.income,
-                          width: dailyRevenues.length > 15 ? 8 : 14,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(3),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                  titlesData: FlTitlesData(
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _WeeklyEarningsCard(),
+                    const SizedBox(height: 10),
+                    DfaStatGrid(
+                      items: dfaStats([
+                        ('GROSS', r'$1,512', null),
+                        ('MILES', '784', null),
+                        ('HOURS', '41.5', null),
+                        (r'$/HR', r'$28.6', AppColors.dfaGreen),
+                      ]),
                     ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
+                    const SizedBox(height: 16),
+                    _AiInsightsSection(),
+                    const SizedBox(height: 18),
+                    DfaSectionLabel(
+                      'TODAY · 3 SHIFTS',
+                      trailingLabel: 'LOG →',
+                      onTrailingTap: () => context.go('/app/trips'),
                     ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 28,
-                        getTitlesWidget: (value, meta) {
-                          final i = value.toInt();
-                          if (i < 0 || i >= dailyRevenues.length) {
-                            return const SizedBox();
-                          }
-                          final date = dailyRevenues[i].date;
-                          if (dailyRevenues.length > 15 && date.day % 5 != 0) {
-                            return const SizedBox();
-                          }
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              '${date.day}',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  gridData: const FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
-                  barTouchData: BarTouchData(
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        return BarTooltipItem(
-                          formatCurrency((rod.toY * 100).round()),
-                          const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                    const SizedBox(height: 8),
+                    _TodayShifts(),
+                    const SizedBox(height: 16),
+                    _BottomCards(),
+                  ],
                 ),
               ),
             ),
@@ -279,293 +58,67 @@ class _DailyRevenueChart extends StatelessWidget {
   }
 }
 
-class _PeriodSelector extends StatelessWidget {
-  const _PeriodSelector({
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final _Period selected;
-  final ValueChanged<_Period> onChanged;
-
+class _WeeklyEarningsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: _Period.values
-          .map(
-            (p) => Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: ChoiceChip(
-                  label: Text(p.label),
-                  selected: p == selected,
-                  onSelected: (_) => onChanged(p),
-                ),
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-}
-
-class _KpiRow extends StatelessWidget {
-  const _KpiRow({required this.summary});
-
-  final DashboardSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _KpiCard(
-            icon: Icons.arrow_upward_rounded,
-            label: 'Receita',
-            amountCents: summary.totalIncomeCents,
-            color: AppColors.income,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _KpiCard(
-            icon: Icons.arrow_downward_rounded,
-            label: 'Despesas',
-            amountCents: summary.totalExpensesCents,
-            color: AppColors.expense,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _KpiCard(
-            icon: Icons.account_balance_wallet_outlined,
-            label: 'Lucro',
-            amountCents: summary.netProfitCents,
-            color: summary.netProfitCents >= 0
-                ? AppColors.income
-                : AppColors.expense,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _KpiCard extends StatelessWidget {
-  const _KpiCard({
-    required this.icon,
-    required this.label,
-    required this.amountCents,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String label;
-  final int amountCents;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-            const SizedBox(height: 2),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                formatCurrency(amountCents),
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w700,
-                    ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GoalCard extends StatelessWidget {
-  const _GoalCard({required this.summary});
-
-  final DashboardSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = summary.goalProgress!;
-    final clampedProgress = progress.clamp(0.0, 1.0);
-    final now = DateTime.now();
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final expectedProgress = now.day / daysInMonth;
-    final isAhead = summary.isGoalMet || progress >= expectedProgress;
-    final barColor = isAhead ? AppColors.income : AppColors.warning;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Meta do mês',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                Text(
-                  '${(progress * 100).toStringAsFixed(0)}%',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: barColor,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: clampedProgress,
-              color: barColor,
-              backgroundColor: barColor.withValues(alpha: 0.15),
-              minHeight: 8,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            const SizedBox(height: 8),
-            if (summary.isGoalMet)
-              Text(
-                'Meta atingida!',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.income,
-                      fontWeight: FontWeight.w600,
-                    ),
-              )
-            else
-              Text(
-                '${formatCurrency(summary.totalIncomeCents)} de '
-                '${formatCurrency(summary.monthlyGoalCents!)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ExpenseBreakdown extends StatelessWidget {
-  const _ExpenseBreakdown({required this.summary});
-
-  final DashboardSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
+    return DfaCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Text(
-              'Despesas',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    dfaMonoLabel('NET THIS WEEK'),
+                    const SizedBox(height: 2),
+                    dfaMonoBig(r'$1,186.40'),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('+9.4%',
+                      style: GoogleFonts.ibmPlexMono(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.dfaGreen)),
+                  const SizedBox(height: 2),
+                  dfaMonoLabel('VS WK 37', spacing: 0),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: Container(
+              height: 6,
+              color: const Color(0xFF1B2430),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: 0.85,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF1F9E63), AppColors.dfaGreen],
+                    ),
                   ),
-            ),
-          ),
-          ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Color(0xFFFFF3E0),
-              child: Icon(
-                Icons.local_gas_station_rounded,
-                color: Colors.orange,
-                size: 20,
-              ),
-            ),
-            title: const Text('Combustível'),
-            trailing: Text(
-              formatCurrency(summary.fuelExpenseCents),
-              style: const TextStyle(
-                color: AppColors.expense,
-                fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
-          ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Color(0xFFFFEBEE),
-              child: Icon(
-                Icons.receipt_outlined,
-                color: AppColors.expense,
-                size: 20,
-              ),
-            ),
-            title: const Text('Outros'),
-            trailing: Text(
-              formatCurrency(summary.otherExpenseCents),
-              style: const TextStyle(
-                color: AppColors.expense,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          if (summary.depreciationCents > 0)
-            ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFF3E5F5),
-                child: Icon(
-                  Icons.trending_down_rounded,
-                  color: Color(0xFF7B1FA2),
-                  size: 20,
-                ),
-              ),
-              title: const Text('Depreciação'),
-              trailing: Text(
-                formatCurrency(summary.depreciationCents),
-                style: const TextStyle(
-                  color: AppColors.expense,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Total',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                Text(
-                  formatCurrency(summary.totalExpensesCents),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: AppColors.expense,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-              ],
-            ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              dfaMonoLabel(r'85% OF $1,400 GOAL', spacing: 0),
+              dfaMonoLabel(r'$214 TO GO', spacing: 0),
+            ],
           ),
         ],
       ),
@@ -573,71 +126,294 @@ class _ExpenseBreakdown extends StatelessWidget {
   }
 }
 
-class _QuickActions extends StatelessWidget {
-  const _QuickActions();
-
+class _AiInsightsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Registrar',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: 8),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<bool>(
-                    builder: (_) => const TripFormPage(),
-                  ),
-                ),
-                icon: const Icon(Icons.directions_car_rounded, size: 18),
-                label: const Text('Corrida'),
-              ),
+            Row(
+              children: [
+                _PulseDot(),
+                const SizedBox(width: 7),
+                Text('AI INSIGHTS · 5 NEW',
+                    style: GoogleFonts.ibmPlexMono(
+                        fontSize: 10,
+                        letterSpacing: 0.16,
+                        color: AppColors.dfaInk3)),
+              ],
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<bool>(
-                    builder: (_) => const ExpenseFormPage(),
-                  ),
-                ),
-                icon: const Icon(Icons.receipt_outlined, size: 18),
-                label: const Text('Despesa'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<bool>(
-                    builder: (_) => const FuelFormPage(),
-                  ),
-                ),
-                icon: const Icon(Icons.local_gas_station_rounded, size: 18),
-                label: const Text('Abastec.'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<bool>(
-                    builder: (_) => const MaintenanceFormPage(),
-                  ),
-                ),
-                icon: const Icon(Icons.build_outlined, size: 18),
-                label: const Text('Manutenção'),
-              ),
+            GestureDetector(
+              onTap: () => context.go('/app/ai'),
+              child: Text('ALL →',
+                  style: GoogleFonts.ibmPlexMono(
+                      fontSize: 10, color: AppColors.dfaBlue)),
             ),
           ],
+        ),
+        const SizedBox(height: 8),
+        DfaInsightCard(
+          category: 'PROFITABILITY',
+          categoryColor: AppColors.dfaRed,
+          age: '2H AGO',
+          title: 'Airport queue cost you \$68 this week',
+          body:
+              'Your 4 airport waits averaged \$11.40/hr against \$27.10/hr on downtown short hops. Same fuel, 3.2x the idle time.',
+          actionLabel: 'SEE THE 4 TRIPS',
+          onTap: () => context.go('/app/ai'),
+        ),
+        const SizedBox(height: 8),
+        DfaInsightCard(
+          category: 'TAX',
+          categoryColor: AppColors.dfaAmber,
+          age: '6H AGO',
+          title: 'Set aside \$128 more before Sunday',
+          body:
+              'You are 14% behind the pace needed for the Q4 estimate. A \$128 sweep this week keeps you on schedule.',
+          actionLabel: 'SWEEP \$128',
+          onTap: () => context.go('/app/tax'),
+        ),
+        const SizedBox(height: 8),
+        DfaInsightCard(
+          category: 'EXPENSE ANOMALY',
+          categoryColor: AppColors.dfaBlue,
+          age: 'YESTERDAY',
+          title: 'Fuel spend up 18% on flat miles',
+          body:
+              'You filled at Shell on Airport Blvd 5 of 7 times at \$4.41/gal. Costco on Halsey is \$3.88 — about \$31/week back.',
+          actionLabel: 'MAP CHEAPER STOPS',
+          onTap: () => context.go('/app/money'),
+        ),
+      ],
+    );
+  }
+}
+
+class _PulseDot extends StatefulWidget {
+  @override
+  State<_PulseDot> createState() => _PulseDotState();
+}
+
+class _PulseDotState extends State<_PulseDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 2400))
+      ..repeat(reverse: true);
+    _anim = Tween<double>(begin: 0.35, end: 1).animate(_ctrl);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _anim,
+      child: Container(
+        width: 6,
+        height: 6,
+        decoration: const BoxDecoration(
+          color: AppColors.dfaGreen,
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+}
+
+class _TodayShifts extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.dfaLine),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Column(
+        children: [
+          _ShiftRow(
+            time: '6:40a',
+            title: 'Morning airport push',
+            sub: 'UBER · 4.2 hrs · 9 trips',
+            amount: r'$132.40',
+            rate: r'$31.5/h',
+            rateColor: AppColors.dfaGreen,
+            isLast: false,
+          ),
+          _ShiftRow(
+            time: '11:15a',
+            title: 'Lunch delivery block',
+            sub: 'UBER EATS · 2.8 hrs · 11 orders',
+            amount: r'$71.85',
+            rate: r'$25.7/h',
+            rateColor: AppColors.dfaInk,
+            isLast: false,
+          ),
+          _ShiftRow(
+            time: '4:00p',
+            title: 'Evening mixed',
+            sub: 'LYFT + DOORDASH · 3.1 hrs',
+            amount: r'$68.20',
+            rate: r'$22.0/h',
+            rateColor: AppColors.dfaRed,
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShiftRow extends StatelessWidget {
+  const _ShiftRow({
+    required this.time,
+    required this.title,
+    required this.sub,
+    required this.amount,
+    required this.rate,
+    required this.rateColor,
+    required this.isLast,
+  });
+
+  final String time, title, sub, amount, rate;
+  final Color rateColor;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.dfaRaised,
+        border: Border(
+          bottom: isLast
+              ? BorderSide.none
+              : const BorderSide(color: AppColors.dfaLine2),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 52,
+            child: Text(time,
+                style: GoogleFonts.ibmPlexMono(
+                    fontSize: 10, color: AppColors.dfaInk3)),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: GoogleFonts.ibmPlexSans(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.dfaInk)),
+                const SizedBox(height: 2),
+                Text(sub,
+                    style: GoogleFonts.ibmPlexMono(
+                        fontSize: 10, color: AppColors.dfaInk4)),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(amount,
+                  style: GoogleFonts.ibmPlexMono(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.dfaInk)),
+              const SizedBox(height: 2),
+              Text(rate,
+                  style: GoogleFonts.ibmPlexMono(
+                      fontSize: 10, color: rateColor)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomCards extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () => context.go('/app/tax'),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.dfaRaised,
+                border: Border.all(color: AppColors.dfaLine),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  dfaMonoLabel('TAX SET-ASIDE', spacing: 0.12),
+                  const SizedBox(height: 5),
+                  Text(r'$2,410',
+                      style: GoogleFonts.ibmPlexMono(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.dfaAmber)),
+                  const SizedBox(height: 6),
+                  Text('14% behind Q4 pace · \$128 short this week',
+                      style: GoogleFonts.ibmPlexSans(
+                          fontSize: 11,
+                          height: 1.35,
+                          color: AppColors.dfaInk3)),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => context.go('/app/forecast'),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.dfaRaised,
+                border: Border.all(color: AppColors.dfaLine),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  dfaMonoLabel('30-DAY FORECAST', spacing: 0.12),
+                  const SizedBox(height: 5),
+                  Text(r'$4,120',
+                      style: GoogleFonts.ibmPlexMono(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.dfaBlue)),
+                  const SizedBox(height: 6),
+                  Text('Projected net after fuel, tax & service',
+                      style: GoogleFonts.ibmPlexSans(
+                          fontSize: 11,
+                          height: 1.35,
+                          color: AppColors.dfaInk3)),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );

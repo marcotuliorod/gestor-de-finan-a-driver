@@ -54,7 +54,7 @@ class DfaHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(18, 6, 18, 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.dfaLine2, width: 1)),
+        border: Border(bottom: const BorderSide(color: AppColors.dfaLine2, width: 1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -119,7 +119,7 @@ class DfaHeader extends StatelessWidget {
 class DfaStatGrid extends StatelessWidget {
   const DfaStatGrid({super.key, required this.items});
 
-  final List<_StatItem> items;
+  final List<DfaStatItem> items;
 
   @override
   Widget build(BuildContext context) {
@@ -163,15 +163,15 @@ class DfaStatGrid extends StatelessWidget {
   }
 }
 
-class _StatItem {
-  const _StatItem(this.label, this.value, {this.valueColor});
+class DfaStatItem {
+  const DfaStatItem(this.label, this.value, {this.valueColor});
   final String label;
   final String value;
   final Color? valueColor;
 }
 
-List<_StatItem> dfaStats(List<(String, String, Color?)> data) =>
-    data.map((e) => _StatItem(e.$1, e.$2, valueColor: e.$3)).toList();
+List<DfaStatItem> dfaStats(List<(String, String, Color?)> data) =>
+    data.map((e) => DfaStatItem(e.$1, e.$2, valueColor: e.$3)).toList();
 
 class DfaInsightCard extends StatelessWidget {
   const DfaInsightCard({
@@ -201,9 +201,9 @@ class DfaInsightCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.dfaRaised,
           border: Border(
-            top: BorderSide(color: AppColors.dfaLine),
-            right: BorderSide(color: AppColors.dfaLine),
-            bottom: BorderSide(color: AppColors.dfaLine),
+            top: const BorderSide(color: AppColors.dfaLine),
+            right: const BorderSide(color: AppColors.dfaLine),
+            bottom: const BorderSide(color: AppColors.dfaLine),
             left: BorderSide(color: categoryColor, width: 2),
           ),
           borderRadius: BorderRadius.circular(8),
@@ -381,10 +381,10 @@ class DfaListTile extends StatelessWidget {
         color: AppColors.dfaRaised,
         border: leftAccentColor != null
             ? Border(
-                top: BorderSide(color: AppColors.dfaLine2),
+                top: const BorderSide(color: AppColors.dfaLine2),
                 bottom: isLast
                     ? BorderSide.none
-                    : BorderSide(color: AppColors.dfaLine2),
+                    : const BorderSide(color: AppColors.dfaLine2),
                 left: BorderSide(color: leftAccentColor!, width: 2),
               )
             : null,
@@ -439,7 +439,7 @@ class DfaListTile extends StatelessWidget {
           border: Border(
             bottom: isLast
                 ? BorderSide.none
-                : BorderSide(color: AppColors.dfaLine2),
+                : const BorderSide(color: AppColors.dfaLine2),
           ),
         ),
         child: tile,

@@ -30,7 +30,7 @@ abstract final class AppTheme {
         color: AppColors.dfaRaised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10)),
-          side: BorderSide(color: AppColors.dfaLine),
+          side: const BorderSide(color: AppColors.dfaLine),
         ),
       ),
       appBarTheme: const AppBarTheme(

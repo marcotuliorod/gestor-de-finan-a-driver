@@ -17,7 +17,7 @@ class AppShell extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Color(0xFF0A0D11),
-          border: Border(top: BorderSide(color: AppColors.dfaLine, width: 1)),
+          border: Border(top: const BorderSide(color: AppColors.dfaLine, width: 1)),
         ),
         child: SafeArea(
           top: false,

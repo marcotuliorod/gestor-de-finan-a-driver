@@ -24,7 +24,7 @@ class AiInsightsPage extends StatelessWidget {
                   children: [
                     _SuggestionChips(),
                     const SizedBox(height: 14),
-                    DfaSectionLabel('RECENT INSIGHTS · 5 NEW'),
+                    const DfaSectionLabel('RECENT INSIGHTS · 5 NEW'),
                     const SizedBox(height: 8),
                     DfaInsightCard(
                       category: 'PROFITABILITY',
@@ -132,7 +132,7 @@ class _ChatInputBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.dfaLine)),
+        border: Border(top: const BorderSide(color: AppColors.dfaLine)),
         color: AppColors.dfaSurface,
       ),
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
@@ -156,7 +156,7 @@ class _ChatInputBar extends StatelessWidget {
           Container(
             width: 36,
             height: 36,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.dfaGreen,
               shape: BoxShape.circle,
             ),

@@ -116,7 +116,7 @@ class _SetAsideTab extends StatelessWidget {
               top: const BorderSide(color: AppColors.dfaLine),
               right: const BorderSide(color: AppColors.dfaLine),
               bottom: const BorderSide(color: AppColors.dfaLine),
-              left: BorderSide(color: AppColors.dfaAmber, width: 2),
+              left: const BorderSide(color: AppColors.dfaAmber, width: 2),
             ),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -167,7 +167,7 @@ class _SetAsideTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        DfaSectionLabel('SCHEDULE C PREVIEW'),
+        const DfaSectionLabel('SCHEDULE C PREVIEW'),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -175,7 +175,7 @@ class _SetAsideTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           clipBehavior: Clip.hardEdge,
-          child: Column(
+          child: const Column(
             children: [
               _SchedLine('Gross platform income', r'$52,840', AppColors.dfaInk,
                   AppColors.dfaRaised, false),
@@ -484,7 +484,7 @@ class _ReconcileTab extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        DfaSectionLabel('PAYOUT VS BANK DEPOSIT'),
+        const DfaSectionLabel('PAYOUT VS BANK DEPOSIT'),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -522,7 +522,7 @@ class _ReconcileTab extends StatelessWidget {
               top: const BorderSide(color: AppColors.dfaLine),
               right: const BorderSide(color: AppColors.dfaLine),
               bottom: const BorderSide(color: AppColors.dfaLine),
-              left: BorderSide(color: AppColors.dfaRed, width: 2),
+              left: const BorderSide(color: AppColors.dfaRed, width: 2),
             ),
             borderRadius: BorderRadius.circular(8),
           ),

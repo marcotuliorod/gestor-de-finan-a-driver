@@ -241,7 +241,7 @@ class _TodayShifts extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       clipBehavior: Clip.hardEdge,
-      child: Column(
+      child: const Column(
         children: [
           _ShiftRow(
             time: '6:40a',

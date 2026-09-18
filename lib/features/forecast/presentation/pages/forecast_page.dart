@@ -32,11 +32,11 @@ class ForecastPage extends StatelessWidget {
                       ]),
                     ),
                     const SizedBox(height: 16),
-                    DfaSectionLabel('6-WEEK OUTLOOK · W39–W44'),
+                    const DfaSectionLabel('6-WEEK OUTLOOK · W39–W44'),
                     const SizedBox(height: 8),
                     _WeekBarChart(),
                     const SizedBox(height: 16),
-                    DfaSectionLabel('BOOKED OBLIGATIONS'),
+                    const DfaSectionLabel('BOOKED OBLIGATIONS'),
                     const SizedBox(height: 8),
                     _ObligationsList(),
                     const SizedBox(height: 12),
@@ -148,7 +148,7 @@ class _WeekBarChart extends StatelessWidget {
                                       ? null
                                       : Border.all(
                                           color: AppColors.dfaBlue
-                                              .withOpacity(0.3)),
+                                              .withValues(alpha: 0.3)),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                               ),
@@ -168,11 +168,11 @@ class _WeekBarChart extends StatelessWidget {
             }).toList(),
           ),
           const SizedBox(height: 10),
-          Row(
+          const Row(
             children: [
               _LegendDot(color: AppColors.dfaBlue, label: 'ACTUAL'),
-              const SizedBox(width: 14),
-              _LegendDot(color: const Color(0xFF1B2C3A), label: 'PROJECTED'),
+              SizedBox(width: 14),
+              _LegendDot(color: Color(0xFF1B2C3A), label: 'PROJECTED'),
             ],
           ),
         ],
@@ -298,7 +298,7 @@ class _CashFlowWatchCard extends StatelessWidget {
           top: const BorderSide(color: AppColors.dfaLine),
           right: const BorderSide(color: AppColors.dfaLine),
           bottom: const BorderSide(color: AppColors.dfaLine),
-          left: BorderSide(color: AppColors.dfaBlue, width: 2),
+          left: const BorderSide(color: AppColors.dfaBlue, width: 2),
         ),
         borderRadius: BorderRadius.circular(8),
       ),

@@ -76,7 +76,7 @@ class TripDetailPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       clipBehavior: Clip.hardEdge,
-                      child: Column(
+                      child: const Column(
                         children: [
                           _FareLine('Base fare', r'$30.46', null, false),
                           _FareLine('Surge / promo', r'$10.32',
@@ -100,7 +100,7 @@ class TripDetailPage extends StatelessWidget {
                           top: const BorderSide(color: AppColors.dfaLine),
                           right: const BorderSide(color: AppColors.dfaLine),
                           bottom: const BorderSide(color: AppColors.dfaLine),
-                          left: BorderSide(
+                          left: const BorderSide(
                               color: AppColors.dfaGreen, width: 2),
                         ),
                         borderRadius: BorderRadius.circular(8),

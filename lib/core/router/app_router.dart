@@ -2,7 +2,6 @@ import 'package:driver_finance/core/providers/shared_preferences_provider.dart';
 import 'package:driver_finance/core/ui/components/app_shell.dart';
 import 'package:driver_finance/features/ai_chat/presentation/pages/ai_chat_page.dart';
 import 'package:driver_finance/features/ai_chat/presentation/pages/ai_insights_page.dart';
-import 'package:driver_finance/features/ai_chat/presentation/pages/conversation_list_page.dart';
 import 'package:driver_finance/features/auth/presentation/pages/login_page.dart';
 import 'package:driver_finance/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:driver_finance/features/auth/presentation/providers/auth_provider.dart';

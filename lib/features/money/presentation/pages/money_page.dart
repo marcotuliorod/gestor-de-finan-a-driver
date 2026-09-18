@@ -381,7 +381,7 @@ class _MileageTab extends StatelessWidget {
         const SizedBox(height: 14),
         _MileageBarChart(),
         const SizedBox(height: 14),
-        DfaSectionLabel('AUTO-TRACKED · TODAY'),
+        const DfaSectionLabel('AUTO-TRACKED · TODAY'),
         const SizedBox(height: 8),
         _MileageSegments(),
         const SizedBox(height: 12),
@@ -668,7 +668,7 @@ class _VehicleTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        DfaSectionLabel('UPCOMING'),
+        const DfaSectionLabel('UPCOMING'),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -688,7 +688,7 @@ class _VehicleTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        DfaSectionLabel('HISTORY'),
+        const DfaSectionLabel('HISTORY'),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -696,7 +696,7 @@ class _VehicleTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           clipBehavior: Clip.hardEdge,
-          child: Column(
+          child: const Column(
             children: [
               _HistoryRow('Tire rotation & balance', 'SEP 16 · 186,940 mi',
                   r'$64.00', false),

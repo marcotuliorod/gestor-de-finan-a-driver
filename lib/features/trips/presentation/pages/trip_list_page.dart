@@ -14,7 +14,6 @@ class TripListPage extends StatefulWidget {
 class _TripListPageState extends State<TripListPage> {
   int _platform = 0;
 
-  static const _platforms = ['ALL', 'UBER', 'LYFT', 'UBEREATS', 'DOORDASH'];
 
   @override
   Widget build(BuildContext context) {
